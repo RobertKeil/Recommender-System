@@ -254,6 +254,8 @@ public class processData {
 		  FileInputStream file= new FileInputStream(new File(mergedFileName));
 		  BufferedReader brFile = new BufferedReader(new InputStreamReader(file));
 		  String line=brFile.readLine();
+		try{
+		
 		  int[][]totalUserClicksAndBuys=getTotalClicksAndBuysForEachSession(mergedFileName);
 		  
 		 
@@ -266,17 +268,19 @@ public class processData {
 			 
 			 int counter=0;
 			 
-			 while(counter<totalUserClicksAndBuys.length && totalUserClicksAndBuys[counter]!=null)
+			 while(counter<totalUserClicksAndBuys.length )
 			 {
-				 
+				 if(totalUserClicksAndBuys[counter]!=null){
 				 if (Integer.parseInt(arrayLine[0])==totalUserClicksAndBuys[counter][0])
-						 
 						 {
+				
 					 		ratedFile.println(arrayLine[0]+"," + 
 					 		arrayLine[1]+","+ 
-					 		(RatingAlgorithm.algorithm1(Integer.parseInt(arrayLine[3]), Integer.parseInt(arrayLine[5]), totalUserClicksAndBuys[counter][1])));
+					 		ratingAlgorithm.algorithm2(Integer.parseInt(arrayLine[3]), Integer.parseInt(arrayLine[5]), totalUserClicksAndBuys[counter][1],totalUserClicksAndBuys[counter][2]));
+					 	
+					 	
 				 }
-				
+			 }	
 				 counter++;
 			 }
 				 
@@ -285,16 +289,21 @@ public class processData {
 			 line=brFile.readLine();
 		
 		
-			 
 		 }
+		 ratedFile.close();
+		 
+		}
+		catch(Exception e)
+		{
+			System.out.println("Exception occured: " + e.getMessage());
+		}
 	return ratedFileName;
-		
 	}
 	public static int [][] getTotalClicksAndBuysForEachSession(String mergedFileName) throws Exception
 	{
 		
 		int noOfRows=getNoOfRows(mergedFileName);
-		int[][]totalClicksAndBuys=new int[noOfRows][6];
+		int[][]totalClicksAndBuys=new int[noOfRows][3];
 		  FileInputStream file= new FileInputStream(new File(mergedFileName));
 		  BufferedReader brFile = new BufferedReader(new InputStreamReader(file));
 		  String line=brFile.readLine();
@@ -309,24 +318,27 @@ public class processData {
 			 if (Integer.parseInt(arrayLine[0])==sessionID)
 			 {
 				 
-				 totalClicksAndBuys[counter][1]+=Integer.parseInt(arrayLine[3])+(Integer.parseInt(arrayLine[5])*2);
+				 
+				 totalClicksAndBuys[counter-1][1]+=Integer.parseInt(arrayLine[3]);
+				 totalClicksAndBuys[counter-1][2]+=(Integer.parseInt(arrayLine[5]));
 				 
 			 }
 			 
-			 else if (counter!=0)
-			 {
-				 counter++;
-				 totalClicksAndBuys[counter][0]=Integer.parseInt(arrayLine[0]);
-				 totalClicksAndBuys[counter][1]=Integer.parseInt(arrayLine[3])+(Integer.parseInt(arrayLine[5])*2);
-				 sessionID=totalClicksAndBuys[counter][0];
-				 
-				 
-			 }
+//			 else if (counter!=0)
+//			 {
+//				 counter++;
+//				 totalClicksAndBuys[counter][0]=Integer.parseInt(arrayLine[0]);
+//				 totalClicksAndBuys[counter][1]=Integer.parseInt(arrayLine[3])+(Integer.parseInt(arrayLine[5]));
+//				 sessionID=totalClicksAndBuys[counter][0];
+//				 
+//				 
+//			 }
 			 
-			 else if(counter==0)
+			 else
 			 {
 				 totalClicksAndBuys[counter][0]=Integer.parseInt(arrayLine[0]);
-				 totalClicksAndBuys[counter][1]=Integer.parseInt(arrayLine[3])+(Integer.parseInt(arrayLine[5])*2);
+				 totalClicksAndBuys[counter][1]=Integer.parseInt(arrayLine[3]);
+						 totalClicksAndBuys[counter][2]=(Integer.parseInt(arrayLine[5]));
 				 sessionID=totalClicksAndBuys[counter][0];
 				 
 				 counter++;
@@ -343,6 +355,7 @@ public class processData {
 		
 		
 	}
+	
 	
 	/**
 	 * This method joins a clicks file and a buys file. Both files have to be aggregated. 

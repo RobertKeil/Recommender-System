@@ -1,6 +1,6 @@
 package com.RecSys.Recommender;
 
-class RatingAlgorithm {
+public  class ratingAlgorithm {
 
 	private static final int weightClicks = 1;
 	private static final int weightBuys = 5;
@@ -22,7 +22,14 @@ class RatingAlgorithm {
 
 		return fraction;
 	}
+	public static float algorithm2(int clicks, int buys, int amountClicks,int amountBuys) {
 
+		float rating = clicks * weightClicks + buys * weightBuys;
+		float denominator=(amountClicks*weightClicks)+(amountBuys*weightBuys);
+		float fraction = (rating / denominator)*5 ;
+
+		return fraction;
+	}
 	// rating is computed based on certain ranges
 	public static float algorithm3(int clicks, int buys, int amountClicksBuys) {
 
