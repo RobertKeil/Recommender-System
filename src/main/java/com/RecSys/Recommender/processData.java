@@ -18,7 +18,7 @@ import java.util.Comparator;
 
 //test github
 
-public class ProcessData {
+public class processData {
  static 	String startDir = System.getProperty("user.dir");
 
  /**
