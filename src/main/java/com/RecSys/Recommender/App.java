@@ -127,30 +127,30 @@ public class App {
 		String startDir = System.getProperty("user.dir");
 
 		String clicksFileName = startDir
-				+ "\\data\\YooChoose Dataset\\reduced1000th.csv";
+				+ "\\data\\YooChoose Dataset\\reduced100th.csv";
 		String buysFileName = startDir
 				+ "\\data\\YooChoose Dataset\\yoochoose-buys.dat";
 		String sortedClicksFileName = startDir
-				+ "\\data\\YooChoose Dataset\\Sorted reduced1000th.csv";
+				+ "\\data\\YooChoose Dataset\\Sorted reduced100th.csv";
 		String sortedBuysFileName = startDir
 				+ "\\data\\YooChoose Dataset\\Sorted yoochoose-buys.dat";
 		String aggregatedClicksFileName = startDir
-				+ "\\data\\YooChoose Dataset\\Sorted Aggregated reduced1000th NO TIME.csv";
+				+ "\\data\\YooChoose Dataset\\Sorted Aggregated reduced100th NO TIME.csv";
 		String aggregatedBuysFileName = startDir
 				+ "\\data\\YooChoose Dataset\\Sorted Aggregated buys NO TIME.dat";
 		String mergedFileName = startDir
-				+ "\\data\\YooChoose Dataset\\Sorted Aggregated merged1000th NO TIME.csv";
+				+ "\\data\\YooChoose Dataset\\Sorted Aggregated merged100th NO TIME.csv";
 		String ratedFileName =  startDir
-				+ "\\data\\YooChoose Dataset\\Rated Sorted Aggregated merged1000th NO TIME.csv";
+				+ "\\data\\YooChoose Dataset\\Rated Sorted Aggregated merged100th NO TIME.csv";
 		String recommendationsFileName =  startDir
 				+ "\\data\\YooChoose Dataset\\Recommendations Rated Sorted Aggregated merged1000th NO TIME.csv";
 		
-		//		processData.reduceDataset(1000);
+//		processData.reduceDataset(100);
 //		 processData.sortFile(clicksFileName);
 //		 processData.sortFile(buysFileName);	
 //		 processData.aggregateClicks(sortedClicksFileName, aggregatedClicksFileName);
 		// processData.aggregateBuys(sortedBuysFileName, aggregatedBuysFileName);
-//		 processData.joinDatasets(aggregatedClicksFileName, aggregatedBuysFileName, mergedFileName);
+		 processData.joinDatasets(aggregatedClicksFileName, aggregatedBuysFileName, mergedFileName);
 //		processData.convertToRatings(mergedFileName);
 
 		// processData.aggregateBuys();
@@ -168,10 +168,10 @@ public class App {
  
 //		 MyRecommender.printRecommendations (ratedFileName); 
 		 
-		MyRecommender recommender = new MyRecommender(ratedFileName, mergedFileName);
-		
-		recommender.evaluateRecommendationsFile(recommendationsFileName);
-		
+//		MyRecommender recommender = new MyRecommender(ratedFileName, mergedFileName);
+//		
+//		recommender.evaluateRecommendationsFile(recommendationsFileName);
+//		
 		
 //		double accuracy = recommender.evaluateRecommender();
 //		 System.out.println(accuracy);
