@@ -27,7 +27,7 @@ public class processData {
   * @return the path of the reduced file
   * @throws Exception
   */
- public static String reduceDataset (int reduction) throws Exception {
+ public static String reduceDataset	 (int reduction) throws Exception {
 
 		
 		String clickFileName= "C:\\Users\\rober_000\\Documents\\yoochoose-clicks.dat";
@@ -416,4 +416,75 @@ public class processData {
 		  brBuy.close();
 		  mergedFile.close();
 	}
+
+	/**
+		 * This method joins a clicks file and a buys file. Both files have to be aggregated. 
+		 * @param clickFileName path of the clicks file
+		 * @param buyFileName path of the buys file
+		 * @param mergedFileName path of the merged file to be created
+		 * @throws Exception
+		 */
+		
+	/**
+	 * This method prints all records that indeed correspond to a session in  the clicks file but which contain a product id that did not appear in the clicks file
+	 * @param clickFileName
+	 * @param buyFileName
+	 * @param mergedFileName
+	 * @throws Exception
+	 */
+		public static void joinDatasetsBuysWithoutCorrespondingProductID(String clickFileName,String buyFileName, String mergedFileName) throws Exception{
+			
+			  FileReader buyFile = new FileReader(new File(buyFileName));
+			  BufferedReader brBuy = new BufferedReader(buyFile);
+			  FileInputStream clickFile= new FileInputStream(new File(clickFileName));
+			  BufferedReader brClick = new BufferedReader(new InputStreamReader(clickFile));
+	
+			  PrintWriter mergedFile = new PrintWriter (mergedFileName);
+	
+			  boolean entryFound = false; 
+			  boolean sessionFound = false; 
+			  int counter=0;
+			  String tempClick;
+			  String tempBuy = brBuy.readLine();
+	
+			  while (tempBuy !=null) {
+				  clickFile.getChannel().position(0);
+				  String[] tempBuyArr=tempBuy.split(",");
+				  
+				  tempClick=brClick.readLine();
+				  
+				  while (tempClick != null) {
+
+					  String[] tempClickArr=tempClick.split(",");	
+	
+					  //if sessionid and itemid are same, do not print anything
+					  if (tempClickArr[0].equals(tempBuyArr[0]) && tempClickArr[1].equals(tempBuyArr[1])) {		  
+						  entryFound = true; 
+						  sessionFound = true; 
+					  }	
+					  
+					  if (tempClickArr[0].equals(tempBuyArr[0])) {		  
+						  sessionFound = true; 
+					  }
+					  
+					  tempClick=brClick.readLine();
+				  }
+				  
+				  //Only print files if combination of Session and Product has not been found but sessionid has been found
+				  if (!entryFound && sessionFound){
+					  mergedFile.println(tempBuyArr[0] + ";" + tempBuyArr[1] + ";?;0;" + tempBuyArr[2] + ";" + tempBuyArr[3]);
+				  }
+				  entryFound = false;
+				  sessionFound = false;
+				  
+				  counter++;
+				  if (counter%1000==0){
+					  System.out.println(counter);
+				  }
+				  tempBuy = brBuy.readLine();
+			  }
+			  brClick.close();
+			  brBuy.close();
+			  mergedFile.close();
+		}
 }

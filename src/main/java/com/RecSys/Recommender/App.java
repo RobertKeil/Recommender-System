@@ -135,7 +135,7 @@ public class App {
 		String sortedBuysFileName = startDir
 				+ "\\data\\YooChoose Dataset\\Sorted yoochoose-buys.dat";
 		String aggregatedClicksFileName = startDir
-				+ "\\data\\YooChoose Dataset\\Sorted Aggregated reduced100th NO TIME.csv";
+				+ "\\data\\YooChoose Dataset\\Sorted Aggregated reduced1000th NO TIME.csv";
 		String aggregatedBuysFileName = startDir
 				+ "\\data\\YooChoose Dataset\\Sorted Aggregated buys NO TIME.dat";
 		String mergedFileName = startDir
@@ -144,13 +144,17 @@ public class App {
 				+ "\\data\\YooChoose Dataset\\Rated Sorted Aggregated merged100th NO TIME.csv";
 		String recommendationsFileName =  startDir
 				+ "\\data\\YooChoose Dataset\\Recommendations Rated Sorted Aggregated merged1000th NO TIME.csv";
+		String mergedFileNameBuys =  startDir
+				+ "\\data\\YooChoose Dataset\\ Sorted Aggregated merged1000th NO TIME JUST BUYS.csv";
+		
+		
 		
 //		processData.reduceDataset(100);
 //		 processData.sortFile(clicksFileName);
 //		 processData.sortFile(buysFileName);	
 //		 processData.aggregateClicks(sortedClicksFileName, aggregatedClicksFileName);
 		// processData.aggregateBuys(sortedBuysFileName, aggregatedBuysFileName);
-		 processData.joinDatasets(aggregatedClicksFileName, aggregatedBuysFileName, mergedFileName);
+		 processData.joinDatasetsBuysWithoutCorrespondingProductID(aggregatedClicksFileName, aggregatedBuysFileName, mergedFileNameBuys);
 //		processData.convertToRatings(mergedFileName);
 
 		// processData.aggregateBuys();
