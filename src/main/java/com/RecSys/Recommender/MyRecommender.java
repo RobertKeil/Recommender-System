@@ -14,12 +14,16 @@ import org.apache.mahout.cf.taste.eval.RecommenderBuilder;
 import org.apache.mahout.cf.taste.eval.RecommenderEvaluator;
 import org.apache.mahout.cf.taste.impl.eval.AverageAbsoluteDifferenceRecommenderEvaluator;
 import org.apache.mahout.cf.taste.impl.model.file.FileDataModel;
+import org.apache.mahout.cf.taste.impl.neighborhood.NearestNUserNeighborhood;
 import org.apache.mahout.cf.taste.impl.neighborhood.ThresholdUserNeighborhood;
 import org.apache.mahout.cf.taste.impl.recommender.GenericUserBasedRecommender;
+import org.apache.mahout.cf.taste.impl.recommender.svd.ALSWRFactorizer;
+import org.apache.mahout.cf.taste.impl.recommender.svd.SVDRecommender;
 import org.apache.mahout.cf.taste.impl.similarity.PearsonCorrelationSimilarity;
 import org.apache.mahout.cf.taste.model.DataModel;
 import org.apache.mahout.cf.taste.neighborhood.UserNeighborhood;
 import org.apache.mahout.cf.taste.recommender.RecommendedItem;
+import org.apache.mahout.cf.taste.recommender.Recommender;
 import org.apache.mahout.cf.taste.recommender.UserBasedRecommender;
 import org.apache.mahout.cf.taste.similarity.UserSimilarity;
 
@@ -108,6 +112,22 @@ public class MyRecommender {
 		
 		String fileNameSubstring = ratedFileName.split("\\\\")[ratedFileName.split("\\\\").length-1];
 		String outputFileName = ratedFileName.replace(fileNameSubstring, "Recommendations " + fileNameSubstring);
+		
+		//SVD Recommender
+		
+		DataModel modelOne = new FileDataModel(new File("Indexed User Triplets.txt"));
+    	UserSimilarity userSimilarity = new PearsonCorrelationSimilarity(modelOne);
+    	UserNeighborhood neighborhood = new NearestNUserNeighborhood(3, userSimilarity, modelOne);
+    	Recommender recommender = new GenericUserBasedRecommender(modelOne, neighborhood, userSimilarity);
+    			
+    	ALSWRFactorizer factorizer = new ALSWRFactorizer(modelOne, 50, 0.065, 15);
+
+    	recommender = new SVDRecommender(modelOne, factorizer);
+    	
+    	//
+		
+		
+		
 		
 		DataModel model = new FileDataModel(new File(ratedFileName));
 		 
