@@ -23,5 +23,6 @@
 		</attributes>
 	</classpathentry>
 	<classpathentry kind="lib" path="libs/slf4j-jdk14-1.7.12.jar"/>
+	<classpathentry kind="lib" path="libs/sqlite-jdbc-3.8.7.jar"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>

@@ -135,7 +135,7 @@ public class App {
 		String sortedBuysFileName = startDir
 				+ "\\data\\YooChoose Dataset\\Sorted yoochoose-buys.dat";
 		String aggregatedClicksFileName = startDir
-				+ "\\data\\YooChoose Dataset\\Sorted Aggregated reduced1000th NO TIME.csv";
+				+ "\\data\\YooChoose Dataset\\Sorted Aggregated reduced10000th NO TIME2.csv";
 		String aggregatedBuysFileName = startDir
 				+ "\\data\\YooChoose Dataset\\Sorted Aggregated buys NO TIME.dat";
 		String mergedFileName = startDir
@@ -145,7 +145,7 @@ public class App {
 		String recommendationsFileName =  startDir
 				+ "\\data\\YooChoose Dataset\\Recommendations Rated Sorted Aggregated merged1000th NO TIME.csv";
 		String mergedFileNameBuys =  startDir
-				+ "\\data\\YooChoose Dataset\\ Sorted Aggregated merged1000th NO TIME JUST BUYS.csv";
+				+ "\\data\\YooChoose Dataset\\ Sorted Aggregated merged10000th NO TIME JUST BUYS.csv";
 		
 		
 		
