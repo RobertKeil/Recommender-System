@@ -10,15 +10,17 @@ import java.io.PrintWriter;
 import java.util.Arrays;
 import java.util.Comparator;
 
+import org.apache.commons.lang3.ArrayUtils;
+
 /**
  * This class preprocesses the data from the competition
- * @author robert and daniel
+ * @author Robert and Daniel
  *
  */
 
 //test github
 
-public class processData {
+public class ProcessData {
  static 	String startDir = System.getProperty("user.dir");
 
  /**
@@ -129,7 +131,7 @@ public class processData {
 			  if (tempClickArrNow[0].equals(tempClickArrLast[0]) && tempClickArrNow[2].equals(tempClickArrLast[2])){
 				  counter++;
 			  }else{
-				  aggregatedFile.println(tempClickArrLast[0] + "," + tempClickArrLast[2] + "," + tempClickArrLast[3] + "," + counter);
+				  aggregatedFile.println(tempClickArrLast[0] + "," + tempClickArrLast[2] + /* "," + tempClickArrLast[3] + */ "," + counter);
 				  counter = 1;
 			  }
 			  tempClickArrLast = tempClickArrNow;
@@ -245,63 +247,137 @@ public class processData {
 	public static String convertToRatings(String mergedFileName) throws Exception
 	{
 		String [] arrayLine;
-		double rating;
-		
 		String ratedFileName= startDir+"\\data\\YooChoose Dataset\\Rated " + mergedFileName.split("\\\\")[mergedFileName.split("\\\\").length-1];
 	
 		PrintWriter ratedFile= new PrintWriter (ratedFileName);
 		
 		  FileInputStream file= new FileInputStream(new File(mergedFileName));
 		  BufferedReader brFile = new BufferedReader(new InputStreamReader(file));
-		  String line=brFile.readLine();
-		try{
-		
 		  int[][]totalUserClicksAndBuys=getTotalClicksAndBuysForEachSession(mergedFileName);
+
+		  String line=brFile.readLine();
 		  
-		 
-		  
-		 while (line!=null)
-			 
-		 {
-			 arrayLine=line.split(",");
-//			 rating=Integer.parseInt(arrayLine[3])+(Integer.parseInt(arrayLine[5])*2);
-			 
-			 int counter=0;
-			 
-			 while(counter<totalUserClicksAndBuys.length )
-			 {
-				 if(totalUserClicksAndBuys[counter]!=null){
-				 if (Integer.parseInt(arrayLine[0])==totalUserClicksAndBuys[counter][0])
-						 {
+		  while (line!=null){
 				
+			arrayLine=line.split(",");
+			int counter=0;
+			 
+			while(counter<totalUserClicksAndBuys.length )
+			{
+				 if(totalUserClicksAndBuys[counter]!=null){
+				 if (Integer.parseInt(arrayLine[0])==totalUserClicksAndBuys[counter][0]){
+					 
 					 		ratedFile.println(arrayLine[0]+"," + 
 					 		arrayLine[1]+","+ 
-					 		ratingAlgorithm.algorithm2(Integer.parseInt(arrayLine[3]), Integer.parseInt(arrayLine[5]), totalUserClicksAndBuys[counter][1],totalUserClicksAndBuys[counter][2]));
-					 	
-					 	
-				 }
-			 }	
+					 		RatingAlgorithm.algorithm2(Integer.parseInt(arrayLine[3]), Integer.parseInt(arrayLine[5]), totalUserClicksAndBuys[counter][1],totalUserClicksAndBuys[counter][2]));
+						 }
+				 }	
 				 counter++;
 			 }
-				 
-			
 			 
 			 line=brFile.readLine();
-		
-		
 		 }
 		 ratedFile.close();
 		 
-		}
-		catch(Exception e)
-		{
-			System.out.println("Exception occured: " + e.getMessage());
-		}
 	return ratedFileName;
 	}
-	public static int [][] getTotalClicksAndBuysForEachSession(String mergedFileName) throws Exception
+
+	public static String convertToRatingsStudyByChoiEtAl(String mergedFileName) throws Exception
 	{
+		String [] arrayLine;
+		String ratedFileName= startDir+"\\data\\YooChoose Dataset\\RatedChoiEtAl " + mergedFileName.split("\\\\")[mergedFileName.split("\\\\").length-1];
 		
+		int[][]totalUserClicksAndBuys=getTotalClicksAndBuysForEachSession(mergedFileName);
+		
+		String[][] absolutePreference = new String[getNoOfRows(mergedFileName)][3];
+		
+		//In the 100th dataset, there are 20000 different products + buffer = 25000
+		String[][] highestAbsolutePreferencePerProduct = new String[2][25000];
+		
+		String currentSessionID;
+		String currentProductID; 
+		String currentAbsolutePreference;
+		
+		int arrayMaximumPreferenceCounter=0;
+		int arrayAbsolutePreferenceCounter=0;
+		int clicksBuysCounter;
+		int iterationsCounter=0;
+		int index;
+		
+		PrintWriter ratedFile= new PrintWriter (ratedFileName);
+		FileInputStream file= new FileInputStream(new File(mergedFileName));
+		BufferedReader brFile = new BufferedReader(new InputStreamReader(file));
+		  
+		String line=brFile.readLine();
+		  
+		while (line!=null){
+				
+			arrayLine=line.split(",");
+			clicksBuysCounter=0;
+			
+			// only continue if there have been buys
+			if (Integer.parseInt(arrayLine[5])>0){
+			
+				while(clicksBuysCounter<totalUserClicksAndBuys.length ){
+					
+					// IF still sessions contained AND sessionIDs are the same 
+					 if(totalUserClicksAndBuys[clicksBuysCounter]!=null
+							 && Integer.parseInt(arrayLine[0])==totalUserClicksAndBuys[clicksBuysCounter][0]){
+						 
+						 absolutePreference[arrayAbsolutePreferenceCounter][0]= currentSessionID =arrayLine[0];
+						 absolutePreference[arrayAbsolutePreferenceCounter][1]= currentProductID =arrayLine[1];
+						 absolutePreference[arrayAbsolutePreferenceCounter][2]= currentAbsolutePreference =Double.toString(RatingAlgorithm.algorithm4Step1(
+								 Integer.parseInt(arrayLine[3]), 
+								 Integer.parseInt(arrayLine[5]), 
+								 totalUserClicksAndBuys[clicksBuysCounter][1],
+								 totalUserClicksAndBuys[clicksBuysCounter][2]));
+						 arrayAbsolutePreferenceCounter++;
+						 
+						 // see if productID is already listed in array
+						 if(ArrayUtils.contains(highestAbsolutePreferencePerProduct[0], currentProductID)){
+							 
+							 index = ArrayUtils.indexOf(highestAbsolutePreferencePerProduct[0], currentProductID);
+							 
+							 // see if absolutePreference of current user is new maximum preference for product
+							 if (Float.parseFloat(currentAbsolutePreference) > Float.parseFloat(highestAbsolutePreferencePerProduct[1][index])){
+								 
+								 highestAbsolutePreferencePerProduct[0][index]=currentProductID;
+								 highestAbsolutePreferencePerProduct[1][index]=currentAbsolutePreference;
+							 }
+					 }else {
+						 //If productID was not listed in Array, add the value to it
+						 highestAbsolutePreferencePerProduct[0][arrayMaximumPreferenceCounter]=currentProductID;
+						 highestAbsolutePreferencePerProduct[1][arrayMaximumPreferenceCounter]=currentAbsolutePreference;
+						 
+						 arrayMaximumPreferenceCounter++;
+					 }
+				 	}
+					 clicksBuysCounter++;
+				}
+			}	
+			System.out.println(iterationsCounter++);
+			line=brFile.readLine();
+		}
+			
+			//now all absolute Preferences are stored as well as the maximum preferences of every product. Now the second part of the calculation begins
+			int counter=0;
+
+			while(counter < absolutePreference.length && absolutePreference[counter][0]!=null){
+				
+				// search for productID
+				index = ArrayUtils.indexOf(highestAbsolutePreferencePerProduct[0], absolutePreference[counter][1]);
+				
+				ratedFile.println(absolutePreference[counter][0] + ";" + absolutePreference[counter][1] + ";" 
+				+ RatingAlgorithm.algorithm4Step2(Double.parseDouble(absolutePreference[counter][2]), Double.parseDouble(highestAbsolutePreferencePerProduct[1][index])));						
+						
+				System.out.println(counter++);
+			}
+			
+		 ratedFile.close();
+		return ratedFileName;
+	}
+	
+	public static int [][] getTotalClicksAndBuysForEachSession(String mergedFileName) throws Exception{
 		int noOfRows=getNoOfRows(mergedFileName);
 		int[][]totalClicksAndBuys=new int[noOfRows][3];
 		  FileInputStream file= new FileInputStream(new File(mergedFileName));
@@ -311,34 +387,21 @@ public class processData {
 		 int sessionID=0;
 		 int counter=0;
 		 
-		  
 		 while (line!=null)
 		 {
 			String arrayLine[]=line.split(",");
 			 if (Integer.parseInt(arrayLine[0])==sessionID)
 			 {
 				 
-				 
 				 totalClicksAndBuys[counter-1][1]+=Integer.parseInt(arrayLine[3]);
 				 totalClicksAndBuys[counter-1][2]+=(Integer.parseInt(arrayLine[5]));
-				 
 			 }
-			 
-//			 else if (counter!=0)
-//			 {
-//				 counter++;
-//				 totalClicksAndBuys[counter][0]=Integer.parseInt(arrayLine[0]);
-//				 totalClicksAndBuys[counter][1]=Integer.parseInt(arrayLine[3])+(Integer.parseInt(arrayLine[5]));
-//				 sessionID=totalClicksAndBuys[counter][0];
-//				 
-//				 
-//			 }
 			 
 			 else
 			 {
 				 totalClicksAndBuys[counter][0]=Integer.parseInt(arrayLine[0]);
 				 totalClicksAndBuys[counter][1]=Integer.parseInt(arrayLine[3]);
-						 totalClicksAndBuys[counter][2]=(Integer.parseInt(arrayLine[5]));
+				 totalClicksAndBuys[counter][2]=(Integer.parseInt(arrayLine[5]));
 				 sessionID=totalClicksAndBuys[counter][0];
 				 
 				 counter++;
@@ -347,13 +410,9 @@ public class processData {
 			 line=brFile.readLine();
 			 
 		 }
-		 
 	
 		brFile.close();
-		
 		return totalClicksAndBuys;
-		
-		
 	}
 	
 	

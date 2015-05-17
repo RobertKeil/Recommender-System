@@ -113,16 +113,16 @@ public class MyRecommender {
 		String fileNameSubstring = ratedFileName.split("\\\\")[ratedFileName.split("\\\\").length-1];
 		String outputFileName = ratedFileName.replace(fileNameSubstring, "Recommendations " + fileNameSubstring);
 		
-		//SVD Recommender
-		
-		DataModel modelOne = new FileDataModel(new File("Indexed User Triplets.txt"));
-    	UserSimilarity userSimilarity = new PearsonCorrelationSimilarity(modelOne);
-    	UserNeighborhood neighborhood = new NearestNUserNeighborhood(3, userSimilarity, modelOne);
-    	Recommender recommender = new GenericUserBasedRecommender(modelOne, neighborhood, userSimilarity);
-    			
-    	ALSWRFactorizer factorizer = new ALSWRFactorizer(modelOne, 50, 0.065, 15);
-
-    	recommender = new SVDRecommender(modelOne, factorizer);
+//		//SVD Recommender
+//		
+//		DataModel modelOne = new FileDataModel(new File("Indexed User Triplets.txt"));
+//    	UserSimilarity userSimilarity = new PearsonCorrelationSimilarity(modelOne);
+//    	UserNeighborhood neighborhood = new NearestNUserNeighborhood(3, userSimilarity, modelOne);
+//    	Recommender recommender = new GenericUserBasedRecommender(modelOne, neighborhood, userSimilarity);
+//    			
+//    	ALSWRFactorizer factorizer = new ALSWRFactorizer(modelOne, 50, 0.065, 15);
+//
+//    	recommender = new SVDRecommender(modelOne, factorizer);
     	
     	//
 		
@@ -148,7 +148,7 @@ public class MyRecommender {
 			
 			if (!lastUser.equals(currentUser)){
 				
-				List<RecommendedItem> recommendations = recommender.recommend(Integer.parseInt(currentUser), numberOfRecommendations	);
+				List<RecommendedItem> recommendations = recommender.recommend(Integer.parseInt(currentUser), numberOfRecommendations);
 				 
 				 for (RecommendedItem recommendation : recommendations) {
 					 recFile.println(currentUser + ";" + recommendation.getItemID());

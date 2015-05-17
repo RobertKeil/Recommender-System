@@ -1,27 +1,11 @@
 package com.RecSys.Recommender;
 
-public  class ratingAlgorithm {
+public  class RatingAlgorithm {
 
 	private static final int weightClicks = 1;
 	private static final int weightBuys = 5;
 
-	//total sum is returned
-	public static float algorithm1(int clicks, int buys, int amountClicksBuys) {
 
-		float rating = clicks * weightClicks + buys * weightBuys;
-
-		return rating;
-
-	}
-
-	// fraction of rating/amountClicksBuys is returned
-	public static float algorithm2(int clicks, int buys, int amountClicksBuys) {
-
-		float rating = clicks * weightClicks + buys * weightBuys;
-		float fraction = rating / amountClicksBuys * 5;
-
-		return fraction;
-	}
 	public static float algorithm2(int clicks, int buys, int amountClicks,int amountBuys) {
 
 		float rating = clicks * weightClicks + buys * weightBuys;
@@ -30,6 +14,7 @@ public  class ratingAlgorithm {
 
 		return fraction;
 	}
+	
 	// rating is computed based on certain ranges
 	public static float algorithm3(int clicks, int buys, int amountClicksBuys) {
 
@@ -54,4 +39,25 @@ public  class ratingAlgorithm {
 		return range;
 	}
 
+	/**
+	 * This method implements the CF-algorithm of following paper: http://www.sciencedirect.com/science/article/pii/S156742231200018X#
+	 * Only buys are regarded. 
+	 * @param clicks
+	 * @param buys
+	 * @param amountClicksBuys
+	 * @return
+	 */
+	public static double algorithm4Step1(int clicks, int buys, int totalUserClicks, int totalUserBuys) {
+		
+		double  rating; 
+			rating=  Math.log(((double) buys/(double) totalUserBuys)+1);
+		return rating;
+	}
+
+	public static double algorithm4Step2(double absolutePreference, double maximumPreference) {
+			
+			double rating; 
+				rating = Math.floor(5.0*(absolutePreference/maximumPreference));
+			return rating;
+	}
 }
