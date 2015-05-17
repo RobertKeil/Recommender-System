@@ -35,10 +35,14 @@ public class MyRecommender {
 	
 	String ratedFileName;
 	String mergedFileName; 
+	String implicitFeedbackFile;
 	
-	public MyRecommender (String ratedFileName, String mergedFileName){
+	
+	public MyRecommender (String ratedFileName, String mergedFileName,String implicitFeedbackFile){
 		this.ratedFileName = ratedFileName;
 		this.mergedFileName = mergedFileName;
+		this.implicitFeedbackFile=implicitFeedbackFile;
+		
 	}
 
 	/**
@@ -108,24 +112,12 @@ public class MyRecommender {
 	 * @return
 	 * @param numberOfRecommendations how many recommendations per user
 	 */
-	public String createRecommendationsFile (int numberOfRecommendations) throws IOException, TasteException{
-		
+	public String createRecommendationsFile (int numberOfRecommendations,Boolean svdRecommender) throws IOException, TasteException{
+		if(!svdRecommender){
 		String fileNameSubstring = ratedFileName.split("\\\\")[ratedFileName.split("\\\\").length-1];
 		String outputFileName = ratedFileName.replace(fileNameSubstring, "Recommendations " + fileNameSubstring);
 		
-//		//SVD Recommender
-//		
-//		DataModel modelOne = new FileDataModel(new File("Indexed User Triplets.txt"));
-//    	UserSimilarity userSimilarity = new PearsonCorrelationSimilarity(modelOne);
-//    	UserNeighborhood neighborhood = new NearestNUserNeighborhood(3, userSimilarity, modelOne);
-//    	Recommender recommender = new GenericUserBasedRecommender(modelOne, neighborhood, userSimilarity);
-//    			
-//    	ALSWRFactorizer factorizer = new ALSWRFactorizer(modelOne, 50, 0.065, 15);
-//
-//    	recommender = new SVDRecommender(modelOne, factorizer);
-    	
-    	//
-		
+
 		
 		
 		
@@ -141,7 +133,7 @@ public class MyRecommender {
 		String lastUser="";
 		 
 		String line = ratedFileReader.readLine();
-		
+		int counter=0;
 		while (line != null) {
 			
 			currentUser= line.split(",")[0];
@@ -151,8 +143,9 @@ public class MyRecommender {
 				List<RecommendedItem> recommendations = recommender.recommend(Integer.parseInt(currentUser), numberOfRecommendations);
 				 
 				 for (RecommendedItem recommendation : recommendations) {
-					 recFile.println(currentUser + ";" + recommendation.getItemID());
+					 recFile.println(currentUser + ";" + recommendation.getItemID()+ ";" + recommendation.getValue());
 				 }
+				 System.out.println(counter++);
 			}
 			
 			lastUser=currentUser;
@@ -162,6 +155,51 @@ public class MyRecommender {
 		 recFile.close();
 		
 		return outputFileName;
+		}
+		else
+		{
+			String fileNameSubstring = implicitFeedbackFile.split("\\\\")[implicitFeedbackFile.split("\\\\").length-1];
+			String outputFileName =implicitFeedbackFile.replace(fileNameSubstring, "SVD Recommendations " + fileNameSubstring);
+			
+
+			
+			
+			
+			DataModel model = new FileDataModel(new File(implicitFeedbackFile));
+			 
+			SVDRecommenderBuilder builder = new SVDRecommenderBuilder();
+		SVDRecommender recommender = builder.buildRecommender(model);
+			 
+			FileInputStream implicitFile = new FileInputStream(new File(implicitFeedbackFile));
+			BufferedReader implicitFileReader = new BufferedReader(new InputStreamReader(implicitFile));	
+			PrintWriter recFile = new PrintWriter(outputFileName);
+			String currentUser = "";
+			String lastUser="";
+			 
+			String line = implicitFileReader.readLine();
+			int counter=0;
+			while (line != null) {
+				
+				currentUser= line.split(",")[0];
+				
+				if (!lastUser.equals(currentUser)){
+					
+					List<RecommendedItem> recommendations = recommender.recommend(Integer.parseInt(currentUser), numberOfRecommendations);
+					 
+					 for (RecommendedItem recommendation : recommendations) {
+						 recFile.println(currentUser + ";" + recommendation.getItemID()+ ";" + recommendation.getValue());
+					 }
+					 System.out.println(counter++);
+				}
+				
+				lastUser=currentUser;
+				line = implicitFileReader.readLine();
+			 }
+			 implicitFileReader.close();
+			 recFile.close();
+			
+			return outputFileName;
+		}
 	}
 	
 	
@@ -170,8 +208,8 @@ public class MyRecommender {
 	 * @param ratedFileName The path of the file that contains the sessionid, productid and ratings
 	 * @author Daniel and Robert
 	 */
-	public void printRecommendations () throws IOException, TasteException{
-		
+	public void printRecommendations (Boolean svdRecommender) throws IOException, TasteException{
+		if (!svdRecommender){
 		 DataModel model = new FileDataModel(new File(ratedFileName));
 		 
 		 MyRecommenderBuilder builder = new MyRecommenderBuilder();
@@ -191,7 +229,31 @@ public class MyRecommender {
 			 line = ratedFileReader.readLine();
 		 }
 		 ratedFileReader.close();
-	}
+		}
+		else
+		{
+			DataModel model = new FileDataModel(new File(implicitFeedbackFile));
+			
+			 SVDRecommenderBuilder builder = new SVDRecommenderBuilder();
+			SVDRecommender recommender = builder.buildRecommender(model);
+			
+			 FileInputStream implicitFeedback = new FileInputStream(new File(implicitFeedbackFile));
+			 BufferedReader implicitFileReader = new BufferedReader(new InputStreamReader(implicitFeedback));		
+			 String line = implicitFileReader.readLine();
+			
+			 while (line != null) {
+				 List<RecommendedItem> recommendations = recommender.recommend(Integer.parseInt(line.split(",")[0]), 1);
+				 
+				 for (RecommendedItem recommendation : recommendations) {
+					 System.out.println("Recommendation for " + line.split(",")[0] + ":" + recommendation);
+				 }
+				
+				 line = implicitFileReader.readLine();
+			 }
+			 implicitFileReader.close();
+			}
+		}
+	
 	
 	/**
 	 * Returns the evaluation of the recommender that is defined in the inner Class MyRecommenderBuilder
@@ -228,5 +290,39 @@ public class MyRecommender {
 			UserNeighborhood neighborhood = new ThresholdUserNeighborhood(0.2, similarity, dataModel);
 			return new GenericUserBasedRecommender(dataModel, neighborhood, similarity);
 		}
+		
+		
 	}
+	
+	
+	
+	static class SVDRecommenderBuilder implements RecommenderBuilder{
+		
+		/**
+		 * This method builds the SVD recommender with a factorizer
+		 * @author Daniel
+		 */
+		public SVDRecommender buildRecommender (DataModel dataModel) throws TasteException{
+			
+//			SVD Recommender
+			
+		
+			
+	    	UserSimilarity userSimilarity = new PearsonCorrelationSimilarity(dataModel);
+	    	UserNeighborhood neighborhood = new NearestNUserNeighborhood(3, userSimilarity, dataModel);
+	    	Recommender recommender = new GenericUserBasedRecommender(dataModel, neighborhood, userSimilarity);
+	    			
+	    	ALSWRFactorizer factorizer = new ALSWRFactorizer(dataModel, 50, 0.065, 15);
+	
+	    	return new SVDRecommender(dataModel, factorizer);
+	    	
+	    	//
+			
+		}
+		
+		
+	}
+	
+	
+	
 }
