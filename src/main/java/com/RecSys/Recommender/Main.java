@@ -73,6 +73,7 @@ public class Main {
 		
 		
 		MyRecommender recommender = new MyRecommender(ratedFileName, mergedFileName);
-		recommender.createFinalRecommendationsFile(sortedMergedCombinedRecommendationsFileName, 3);
+		String a = recommender.mergeRecommendationsFiles(recommendationsSVDFileName, recommendationsChoiEtAlFileName);
+		recommender.createFinalRecommendationsFile(a, 1);
 	}
 }
