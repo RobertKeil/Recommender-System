@@ -49,61 +49,30 @@ public class Main {
 				+ "\\data\\YooChoose Dataset\\Sorted Aggregated merged100th NO TIME.csv";
 		String ratedFileName =  startDir
 				+ "\\data\\YooChoose Dataset\\RatedChoiEtAl Sorted Aggregated merged100th NO TIME.csv";
-		String recommendationsFileName =  startDir
+		String recommendationsChoiEtAlFileName =  startDir
 				+ "\\data\\YooChoose Dataset\\Recommendations RatedChoiEtAl Sorted Aggregated merged100th NO TIME.csv";
 		String mergedFileNameBuys =  startDir
-				+ "\\data\\YooChoose Dataset\\Sorted Aggregated merged10000th NO TIME JUST BUYS.csv";
+				+ "\\data\\YooChoose Dataset\\Sorted Aggregated merged100th NO TIME JUST BUYS.csv";
 
 		String implicitClicksFile= startDir
 				+ "\\data\\YooChoose Dataset\\Sorted Aggregated reduced100th NO TIME NO CATEGORY.csv";
+
+
+		String recommendationsSVDFileName= startDir
+				+ "\\data\\YooChoose Dataset\\SVD Recommendations Normalized.csv";
+
+		String mergedCombinedRecommendationsFileName = startDir
+				+ "\\data\\YooChoose Dataset\\MergedChoiEtAl and SVD Recommendations Normalized.csv";
+
+		String sortedMergedCombinedRecommendationsFileName = startDir
+				+ "\\data\\YooChoose Dataset\\Sorted MergedChoiEtAl and SVD Recommendations Normalized.csv";
+
 		
-		String mergedRecommendationsFile = startDir
-				+ "\\data\\YooChoose Dataset\\MergeFolderForCMD\\mergedRecommendations100th.csv";
-		
-//		ProcessData.normalizeImplicitRecScore(startDir
+		//		ProcessData.normalizeImplicitRecScore(startDir
 //				+ "\\data\\YooChoose Dataset\\SVD Recommendations Sorted Aggregated reduced100th NO TIME NO CATEGORY.csv");
 		
 		
-		
-//		processData.reduceDataset(100);
-//		 processData.sortFile(clicksFileName);
-//		 processData.sortFile(buysFileName);	
-//		 ProcessData.aggregateClicks(sortedClicksFileName, aggregatedClicksFileName);
-		// processData.aggregateBuys(sortedBuysFileName, aggregatedBuysFileName);
-//		 ProcessData.joinDatasetsBuysWithoutCorrespondingProductID(aggregatedClicksFileName, aggregatedBuysFileName, mergedFileNameBuys);
-//		processData.convertToRatings(mergedFileName);
-
-//		ProcessData.convertToRatingsStudyByChoiEtAl(mergedFileName);
-		
-		// processData.aggregateBuys();
-
-		// processData.reduceDataset();
-
-		// processData.aggregateClicks();
-
-		// processData.joinDatasets();
-
-		// getIntersectionClickBuySession();
-
-		// ---------------------------------
-//		 Boolean svdRecBool=true;
-//		 
-//MyRecommender recommender=new MyRecommender (ratedFileName,mergedFileName,implicitClicksFile);
-
-//recommender.printRecommendations(svdRecBool);
-//recommender.createRecommendationsFile(3, true);
-
-
-//		ProcessData.convertToRatingsStudyByChoiEtAl(mergedFileName); 
-		
-//		MyRecommender recommender = new MyRecommender(ratedFileName, mergedFileName);
-//		recommender.createRecommendationsFile(3, false);
-//		recommender.evaluateRecommendationsFile(recommendationsFileName);
-		
-		ProcessData.sortFile(mergedRecommendationsFile);
-		
-//		double accuracy = recommender.evaluateRecommender();
-//		 System.out.println(accuracy);
-		 
+		MyRecommender recommender = new MyRecommender(ratedFileName, mergedFileName);
+		recommender.createFinalRecommendationsFile(sortedMergedCombinedRecommendationsFileName, 3);
 	}
 }

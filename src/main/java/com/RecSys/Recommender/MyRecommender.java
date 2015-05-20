@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
@@ -118,10 +119,6 @@ public class MyRecommender {
 		if(!svdRecommender){
 		String fileNameSubstring = ratedFileName.split("\\\\")[ratedFileName.split("\\\\").length-1];
 		String outputFileName = ratedFileName.replace(fileNameSubstring, "Recommendations " + fileNameSubstring);
-		
-
-		
-		
 		
 		DataModel model = new FileDataModel(new File(ratedFileName));
 		 
@@ -320,6 +317,89 @@ public class MyRecommender {
 		
 	}
 	
+	public String mergeRecommendationsFiles (String SVDPath, String ChoiEtAlPath) throws Exception{
+		
+		String fileNameSubstring = SVDPath.split("\\\\")[SVDPath.split("\\\\").length-1];
+		String intermediateFileName =SVDPath.replace(fileNameSubstring, "MergedChoiEtAl and " + fileNameSubstring);
+		
+		  FileInputStream SVDFile= new FileInputStream(new File(SVDPath));
+		  BufferedReader brSVDFile = new BufferedReader(new InputStreamReader(SVDFile));
+		  
+		  FileInputStream ChoiEtAlFile= new FileInputStream(new File(ChoiEtAlPath));
+		  BufferedReader brChoiEtAlFile = new BufferedReader(new InputStreamReader(ChoiEtAlFile));
+
+		  PrintWriter mergedFile = new PrintWriter (intermediateFileName);
+
+		  String line=brSVDFile.readLine();
+		  while (line !=null) {
+			  mergedFile.println(line);
+			  line=brSVDFile.readLine();
+		  }
+		  brSVDFile.close();
+		
+		line=brChoiEtAlFile.readLine();
+		  while (line !=null) {
+			  mergedFile.println(line);
+			  line=brChoiEtAlFile.readLine();
+		  }
+		  brChoiEtAlFile.close();
+		  mergedFile.close();
+		String outputFileName = ProcessData.sortFile(intermediateFileName);
+		
+		return outputFileName;
+		  
+	}
+	/**
+	 * Print the final Recommendations for every User to a File by selecting the X highest ranked products for each user. 
+	 * @author Robert
+	 * @param mergedRecommendationsFile
+	 * @return
+	 * @throws Exception
+	 */
+	public String createFinalRecommendationsFile (String mergedRecommendationsFile, int numberOfRecommendations) throws Exception{
+		
+		String fileNameSubstring = mergedRecommendationsFile.split("\\\\")[mergedRecommendationsFile.split("\\\\").length-1];
+		String outputFileName =mergedRecommendationsFile.replace(fileNameSubstring, "!!!FINAL RECOMMENDATIONS " + fileNameSubstring);
+		
+		String [] tempArray;
+		String currentSession;
+		String lastSession = null;
+		int counter = 0;
+		
+		  FileInputStream file= new FileInputStream(new File(mergedRecommendationsFile));
+		  BufferedReader brFile = new BufferedReader(new InputStreamReader(file));
+		  PrintWriter outputFile = new PrintWriter (outputFileName);
 	
+		  String line=brFile.readLine();
+		  
+		  while (line !=null) {
+			  tempArray = line.split(";");
+			  currentSession = tempArray[0];
+			  
+			  if (!currentSession.equals(lastSession)){
+				  outputFile.println(line);
+				  counter=0;
+			  }else if (currentSession.equals(lastSession)&& counter < numberOfRecommendations){
+				  outputFile.println(line);
+			  }
+			  
+			  lastSession=currentSession;
+			  counter++;
+			  line=brFile.readLine();
+		  }
+		  brFile.close();
+		  outputFile.close();
+		  return outputFileName;
+	}
 	
+	public String createCombinedRecommendationsFile () throws Exception{
+		String choiEtAlFileName = createRecommendationsFile(3, false);
+		String SVDFileName = createRecommendationsFile(3, true);
+		
+		String mergedRecommendationsFileName = mergeRecommendationsFiles(choiEtAlFileName, SVDFileName);
+		
+		String finalCombinedRecommendations = createFinalRecommendationsFile(mergedRecommendationsFileName, 3);
+		return finalCombinedRecommendations;
+		
+	}
 }

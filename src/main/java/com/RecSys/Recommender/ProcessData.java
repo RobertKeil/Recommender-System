@@ -597,4 +597,5 @@ public static String reduceDataset (int interval) throws Exception {
 			  brBuy.close();
 			  mergedFile.close();
 		}
+		
 }
