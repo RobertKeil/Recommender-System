@@ -184,22 +184,24 @@ public static String reduceDataset (int interval) throws Exception {
 		  aggregatedFile.close();
 		  brClick.close();
 		}
-	
+	/**Make sure to adapt respective parameters in the methods called by sortFile. 
+	 * Changes are based on number sorting priorities, line separator, number of columns and paths of read and print file
+	 * @author Daniel
+	 * @param fileName
+	 * @return
+	 * @throws Exception
+	 */
 	public static String  sortFile (String fileName)throws Exception
 	{
-		
 		String[][] arrayFile=ConvertFileTo2dArray(fileName);
 		arrayFile=sort2dArray(arrayFile);
 		return  convertFrom2dArrayToFile(arrayFile, fileName);
-		
-		 
-		
 	}
 	public static String[][] ConvertFileTo2dArray(String filePath) throws Exception
 	{
 		
 		int noOfRows=getNoOfRows(filePath);
-		String [][] arrayFile=new String[noOfRows][4];
+		String [][] arrayFile=new String[noOfRows][3];
     	
 	    
     	
@@ -213,7 +215,7 @@ public static String reduceDataset (int interval) throws Exception {
 		 while (line!=null)
 			 
 		 {
-			 arrayFile[arrayLine]=line.split(",");
+			 arrayFile[arrayLine]=line.split(";");
 			 
 			 line=brFile.readLine();
 		
@@ -255,8 +257,8 @@ public static String reduceDataset (int interval) throws Exception {
 			        
 			        if (x==j)
 			        {
-			        	x=Integer.valueOf(array1[2]);
-			        	j=Integer.valueOf(array2[2]);
+			        	x=Integer.valueOf(array1[1]);
+			        	j=Integer.valueOf(array2[1]);
 			        	
 			   
 			        }
@@ -281,7 +283,7 @@ public static String reduceDataset (int interval) throws Exception {
 	
 		for (int i=0;i<arrayFile.length;i++)
 		{
-		   sortedFile.println(arrayFile[i][0]+","+arrayFile[i][1]+","+arrayFile[i][2]+"," +arrayFile[i][3]);
+		   sortedFile.println(arrayFile[i][0]+";"+arrayFile[i][1]+";"+arrayFile[i][2]);
 		   
 		}
 	

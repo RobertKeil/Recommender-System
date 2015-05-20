@@ -57,10 +57,13 @@ public class Main {
 		String implicitClicksFile= startDir
 				+ "\\data\\YooChoose Dataset\\Sorted Aggregated reduced100th NO TIME NO CATEGORY.csv";
 		
+		String mergedRecommendationsFile = startDir
+				+ "\\data\\YooChoose Dataset\\MergeFolderForCMD\\mergedRecommendations100th.csv";
 		
-		ProcessData.normalizeImplicitRecScore(startDir
-				+ "\\data\\YooChoose Dataset\\SVD Recommendations Sorted Aggregated reduced100th NO TIME NO CATEGORY.csv");
-				
+//		ProcessData.normalizeImplicitRecScore(startDir
+//				+ "\\data\\YooChoose Dataset\\SVD Recommendations Sorted Aggregated reduced100th NO TIME NO CATEGORY.csv");
+		
+		
 		
 //		processData.reduceDataset(100);
 //		 processData.sortFile(clicksFileName);
@@ -93,9 +96,11 @@ public class Main {
 
 //		ProcessData.convertToRatingsStudyByChoiEtAl(mergedFileName); 
 		
-		MyRecommender recommender = new MyRecommender(ratedFileName, mergedFileName);
-		recommender.createRecommendationsFile(3, false);
+//		MyRecommender recommender = new MyRecommender(ratedFileName, mergedFileName);
+//		recommender.createRecommendationsFile(3, false);
 //		recommender.evaluateRecommendationsFile(recommendationsFileName);
+		
+		ProcessData.sortFile(mergedRecommendationsFile);
 		
 //		double accuracy = recommender.evaluateRecommender();
 //		 System.out.println(accuracy);
