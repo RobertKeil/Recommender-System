@@ -132,6 +132,12 @@ public static String reduceDataset (int interval) throws Exception {
 			 else
 			 {
 				 double result=realValue-6;
+				 
+				 if (result>8)
+				 {
+					 result=8;
+					 
+				 }
 				 normalizedValue=(1-(0.12*result))*5;
 				 
 			 }
@@ -252,17 +258,27 @@ public static String reduceDataset (int interval) throws Exception {
 	public static String [][] sort2dArray(String [][] file){
 		 Arrays.sort(file, new Comparator<String[]>() {
 			 public int compare(String[] array1, String[] array2) {
-				  int x = Integer.valueOf(array1[0]);
+			int  x = Integer.valueOf(array1[0]);
 			        int j = Integer.valueOf(array2[0]);
 			        
 			        if (x==j)
 			        {
-			        	x=Integer.valueOf(array1[1]);
-			        	j=Integer.valueOf(array2[1]);
+			        	
+			        	double y=Double.parseDouble(array1[2]);
+			        	double z=Double.parseDouble(array2[2]);
+			        	
+			        	
+			        	return Double.compare(z, y);
+			      
+			        	
 			        	
 			   
 			        }
-			        return Integer.compare(x, j);
+			        else{
+			      return  Integer.compare(x, j);
+			        }
+			      
+			       
 			    }
 		    });
 		
@@ -596,5 +612,65 @@ public static String reduceDataset (int interval) throws Exception {
 			  brClick.close();
 			  brBuy.close();
 			  mergedFile.close();
+		}
+		
+		
+		public static void getTopKResults(int k,String fileName) throws Exception
+		{
+			
+//			FileReader sortedRatingsFile= new FileReader(new File(fileName));
+//			  BufferedReader sortedRatingsBufferedReader= new BufferedReader(sortedRatingsFile);
+			  FileInputStream ratingsFile= new FileInputStream(new File(fileName));
+			  BufferedReader sortedRatingsBufferedReader = new BufferedReader(new InputStreamReader(ratingsFile));
+	String topKFileName=startDir
+				+ "\\data\\YooChoose Dataset\\top " + k +"recommendations.csv";
+			  PrintWriter topKWriter = new PrintWriter (topKFileName);
+			  
+			 String line=sortedRatingsBufferedReader.readLine();
+			 
+			
+		while (line!=null)
+		{
+			
+			String sessionId=line.split(";")[0];
+			
+		
+			boolean moreThanTopKAvailable=true;
+			
+				for(int counter=1;counter<=k;counter++)
+				{
+					
+					
+					if (line.split(";")[0]==sessionId){
+					topKWriter.write(line +"/n");
+					}
+					
+					else{
+						
+						moreThanTopKAvailable=false;
+						break;
+					}
+					
+					line=sortedRatingsBufferedReader.readLine();
+					
+					
+				}
+			
+				if (moreThanTopKAvailable)
+				{
+					while(line.split(";")[0]==sessionId)
+					{
+						line=sortedRatingsBufferedReader.readLine();
+						
+					}
+				}
+				
+			
+		
+			  
+		}
+			
+			  
+			  
 		}
 }

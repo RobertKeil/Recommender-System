@@ -100,8 +100,8 @@ public class Main {
 //		recommender.createRecommendationsFile(3, false);
 //		recommender.evaluateRecommendationsFile(recommendationsFileName);
 		
-		ProcessData.sortFile(mergedRecommendationsFile);
-		
+//		ProcessData.sortFile(mergedRecommendationsFile);
+		ProcessData.getTopKResults(3, "C:\\Users\\Daniel\\workspace\\Recommender-System\\data\\YooChoose Dataset\\Sorted mergedRecommendations100th.csv");
 //		double accuracy = recommender.evaluateRecommender();
 //		 System.out.println(accuracy);
 		 
