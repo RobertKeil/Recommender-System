@@ -1,5 +1,12 @@
 package com.RecSys.Recommender;
 
+
+/**
+ * This class contains different algorithms to derive implicit ratings.
+ * They are all called by a method in ProcessData.java (convertToRatings)
+ * Algorithm 2 and 3 were just experiments. We did not use them in the end. 
+ * The most important algorithm is algorithm 4 which is divied into three steps that are called in method convertToRatingsStudyByChoiEtAl in ProcessData.java.
+ */
 public  class RatingAlgorithm {
 
 	private static final int weightClicks = 1;
@@ -41,23 +48,40 @@ public  class RatingAlgorithm {
 
 	/**
 	 * This method implements the CF-algorithm of following paper: http://www.sciencedirect.com/science/article/pii/S156742231200018X#
-	 * Only buys are regarded. 
-	 * @param clicks
-	 * @param buys
-	 * @param amountClicksBuys
-	 * @return
+	 * Modification: Also clicks are regarded
+	 * @param buys Amount of buys of the current user of the current product
+	 * @param totalUserBuys total amount of buys of the user
 	 */
-	public static double algorithm4Step1(int clicks, int buys, int totalUserClicks, int totalUserBuys) {
+	public static double algorithm4Step1(int buys, int totalUserBuys) {
 		
 		double  rating; 
 			rating=  Math.log(((double) buys/(double) totalUserBuys)+1);
 		return rating;
 	}
-
+	/**
+	 * Preference for buys will be between 3 and 5. See paper http://www.sciencedirect.com/science/article/pii/S156742231200018X#
+	 * @param absolutePreference The preference of the current user for the current product
+	 * @param maximumPreference The maximum preference that any user had for the current product
+	 */
 	public static double algorithm4Step2(double absolutePreference, double maximumPreference) {
 			
 			double rating; 
-				rating = Math.floor(5.0*(absolutePreference/maximumPreference));
+				rating = 2+Math.ceil(3.0*(absolutePreference/maximumPreference));
 			return rating;
 	}
+	
+	/**
+	 * Preference for clicks only will be either 1 or 2
+	 * @param clicks Total clicks on product by current user
+	 */
+	public static double algorithm4Step3 (int clicks) {
+		
+		double rating; 
+			if (clicks < 4)
+				rating = 1.0;
+			else
+				rating = 2.0;
+			
+		return rating;
+}
 }

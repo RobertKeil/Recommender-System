@@ -13,28 +13,26 @@ import java.util.Comparator;
 import org.apache.commons.lang3.ArrayUtils;
 
 /**
- * This class preprocesses the data from the competition
+ * This class preprocesses the data of the competition.
+ * 
  * @author Robert and Daniel
  *
  */
-
-//test github
-
 public class ProcessData {
  static 	String startDir = System.getProperty("user.dir");
 
  /**
   * creates a dataset that contains every xth session of the original clicks dataset. 
-  * @param reduction determines in which intervall a session should be kept in the file
+  * @param interval determines in which interval a session should be kept in the file
   * @return the path of the reduced file
   * @throws Exception
   */
- public static String reduceDataset	 (int reduction) throws Exception {
+public static String reduceDataset (int interval) throws Exception {
 
 		
 		String clickFileName= "C:\\Users\\rober_000\\Documents\\yoochoose-clicks.dat";
 		String reducedFileName= startDir
-				+ "\\data\\YooChoose Dataset\\reduced" + reduction + "th.csv";
+				+ "\\data\\YooChoose Dataset\\reduced" + interval + "th.csv";
 		String lastSession = ""; 
 		
 		
@@ -49,16 +47,18 @@ public class ProcessData {
 		while (tempClick != null) {		
 
 			String[] tempClickArr=tempClick.split(",");		
-
+			
+			//reset counter if interval has been reached
 			if (!lastSession.equals(tempClickArr[0])){
-				if (counter!=reduction){
+				if (counter!=interval){
 					counter++;
 				}else{
 					counter=0;
 				}
 			}
-
-			if (counter==reduction){						
+			
+			//only print every xth session
+			if (counter==interval){						
 				reducedFile.println(tempClickArr[0] + "," + tempClickArr[1] + "," + tempClickArr[2] + "," + tempClickArr[3]);
 			}
 			
@@ -72,10 +72,10 @@ public class ProcessData {
 	}
 	
 	/**
-	 * This method aggregates all records of the buys file that contain the same session id and same product id. This is why the timestamp is left out in the result
+	 * This method aggregates all records of the buys file that contain the same session id and same product id. 
+	 * Several buys of the same user on the same product are summed up. This is why the timestamp is left out in the result
 	 * @param buyFileName The path of the buys file that should be aggregated
 	 * @param aggregatedFileName  The path of the file that should be created
-	 * @throws Exception 
 	 */
 	public static void aggregateBuys (String buyFileName, String aggregatedFileName) throws Exception {
 		
@@ -107,10 +107,10 @@ public class ProcessData {
 	}
 
 	/**
-	 * This method aggregates the clicks with same session id and same product id. Timestamp is left out in the result
+	 * This method aggregates the clicks with same session id and same product id.
+	 * Several clicks of the same user on the same product are summed up. This is why the timestamp is left out in the result
 	 * @param clickFileName Path of the clicks file that should be aggregated
 	 * @param aggregatedFileName Path of the buys file that should be created 
-	 * @throws Exception
 	 */
 	public static void aggregateClicks (String clickFileName, String aggregatedFileName) throws Exception {
 			  
@@ -282,6 +282,13 @@ public class ProcessData {
 	return ratedFileName;
 	}
 
+	/**
+	 * This method creates a files with implicit ratings. it follows the approach by Chio et al. 
+	 * Modification of the approach by Choi et al: Also clicks will be regarded. 
+	 * @param mergedFileName
+	 * @return
+	 * @throws Exception
+	 */
 	public static String convertToRatingsStudyByChoiEtAl(String mergedFileName) throws Exception
 	{
 		String [] arrayLine;
@@ -315,7 +322,13 @@ public class ProcessData {
 			arrayLine=line.split(",");
 			clicksBuysCounter=0;
 			
-			// only continue if there have been buys
+			//already print those entries where no product was bought
+			if (Integer.parseInt(arrayLine[5])==0){
+			ratedFile.println(arrayLine[0] + "," + arrayLine[1] + "," 
+					+ RatingAlgorithm.algorithm4Step3(Integer.parseInt(arrayLine[3])));
+			}
+			
+			// only use Choi et al's algorithm if there have been buys
 			if (Integer.parseInt(arrayLine[5])>0){
 			
 				while(clicksBuysCounter<totalUserClicksAndBuys.length ){
@@ -327,9 +340,7 @@ public class ProcessData {
 						 absolutePreference[arrayAbsolutePreferenceCounter][0]= currentSessionID =arrayLine[0];
 						 absolutePreference[arrayAbsolutePreferenceCounter][1]= currentProductID =arrayLine[1];
 						 absolutePreference[arrayAbsolutePreferenceCounter][2]= currentAbsolutePreference =Double.toString(RatingAlgorithm.algorithm4Step1(
-								 Integer.parseInt(arrayLine[3]), 
 								 Integer.parseInt(arrayLine[5]), 
-								 totalUserClicksAndBuys[clicksBuysCounter][1],
 								 totalUserClicksAndBuys[clicksBuysCounter][2]));
 						 arrayAbsolutePreferenceCounter++;
 						 
@@ -367,7 +378,7 @@ public class ProcessData {
 				// search for productID
 				index = ArrayUtils.indexOf(highestAbsolutePreferencePerProduct[0], absolutePreference[counter][1]);
 				
-				ratedFile.println(absolutePreference[counter][0] + ";" + absolutePreference[counter][1] + ";" 
+				ratedFile.println(absolutePreference[counter][0] + "," + absolutePreference[counter][1] + "," 
 				+ RatingAlgorithm.algorithm4Step2(Double.parseDouble(absolutePreference[counter][2]), Double.parseDouble(highestAbsolutePreferencePerProduct[1][index])));						
 						
 				System.out.println(counter++);
@@ -417,7 +428,8 @@ public class ProcessData {
 	
 	
 	/**
-	 * This method joins a clicks file and a buys file. Both files have to be aggregated. 
+	 * This method joins a clicks file and a buys file. Both files have to be aggregated.
+	 * Join happens on productID and sessionID 
 	 * @param clickFileName path of the clicks file
 	 * @param buyFileName path of the buys file
 	 * @param mergedFileName path of the merged file to be created
@@ -477,15 +489,8 @@ public class ProcessData {
 	}
 
 	/**
-		 * This method joins a clicks file and a buys file. Both files have to be aggregated. 
-		 * @param clickFileName path of the clicks file
-		 * @param buyFileName path of the buys file
-		 * @param mergedFileName path of the merged file to be created
-		 * @throws Exception
-		 */
-		
-	/**
-	 * This method prints all records that indeed correspond to a session in  the clicks file but which contain a product id that did not appear in the clicks file
+	 * This method prints all records that correspond to a session in  the clicks file but which contain a product id that did not appear in the clicks file
+	 * EDIT: Output File is always empty because there are no buys of products that hve not been clicked on
 	 * @param clickFileName
 	 * @param buyFileName
 	 * @param mergedFileName

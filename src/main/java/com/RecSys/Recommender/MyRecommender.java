@@ -29,23 +29,26 @@ import org.apache.mahout.cf.taste.similarity.UserSimilarity;
 
 /**
 This class contains contains our recommendation logic.
-@author Robert
+@author Robert and Daniel
 */
 public class MyRecommender {
 	
 	String ratedFileName;
 	String mergedFileName; 
 	
+	/**
+	 * This constructor has to be called. It permamently stores the ratedFileName and MergedFilename for the recommender.
+	 */
 	public MyRecommender (String ratedFileName, String mergedFileName){
 		this.ratedFileName = ratedFileName;
 		this.mergedFileName = mergedFileName;
 	}
 
 	/**
-	 * Sees if the recommendationsFile corresponds to the mergedFile, i.e. if the recommended buys reflect the actual buys. Corretly predicted buys are printed in a new file. Incorrecct ones are shown in the console
+	 * Sees if the recommendationsFile corresponds to the mergedFile, i.e. if the recommended buys reflect the actual buys. Correctly predicted buys are printed in a new file. Incorrect ones are shown in the console.
+	 * EDIT: Amount of correctly predicted buys will always be zero, because only products are recommended that have not been clicked on before. 
+	 * 
 	 * @param recommendationsFileName path of the file with the recommendations
-	 * @return
-	 * @throws Exception
 	 * @author Robert
 	 */
 	public String evaluateRecommendationsFile (String recommendationsFileName) throws Exception{
@@ -104,8 +107,8 @@ public class MyRecommender {
 	
 	
 	/**
-	 * This method creates a file that contains a certain amount of recommended products for some users. Only those users appear in the file which correspond to the defined neighbourhood threshold in Recommender Builder.
-	 * @return
+	 * This method creates a file that contains a certain amount of recommended products for some users based on the input file and the parameters that are defined in the inner class MyRecommenderBuilder. 
+	 * Only those users appear in the file which correspond to the defined neighbourhood threshold in Recommender Builder.
 	 * @param numberOfRecommendations how many recommendations per user
 	 */
 	public String createRecommendationsFile (int numberOfRecommendations) throws IOException, TasteException{
@@ -139,6 +142,7 @@ public class MyRecommender {
 		PrintWriter recFile = new PrintWriter(outputFileName);
 		String currentUser = "";
 		String lastUser="";
+		int counter=0;
 		 
 		String line = ratedFileReader.readLine();
 		
@@ -146,13 +150,16 @@ public class MyRecommender {
 			
 			currentUser= line.split(",")[0];
 			
+			//only print recommendations one time for every user
 			if (!lastUser.equals(currentUser)){
 				
 				List<RecommendedItem> recommendations = recommender.recommend(Integer.parseInt(currentUser), numberOfRecommendations);
 				 
 				 for (RecommendedItem recommendation : recommendations) {
-					 recFile.println(currentUser + ";" + recommendation.getItemID());
+					 recFile.println(currentUser + ";" + recommendation.getItemID() + ";" + recommendation.getValue());
 				 }
+				 
+				 System.out.println(counter++);
 			}
 			
 			lastUser=currentUser;
@@ -166,9 +173,7 @@ public class MyRecommender {
 	
 	
 	/**
-	 * This Method prints the recommendations based on the input file and the parameters that are defined in the inner class MyRecommenderBuilder
-	 * @param ratedFileName The path of the file that contains the sessionid, productid and ratings
-	 * @author Daniel and Robert
+	 * This Method prints the recommendations onto the console based on the input file and the parameters that are defined in the inner class MyRecommenderBuilder
 	 */
 	public void printRecommendations () throws IOException, TasteException{
 		
@@ -195,11 +200,8 @@ public class MyRecommender {
 	
 	/**
 	 * Returns the evaluation of the recommender that is defined in the inner Class MyRecommenderBuilder
-	 * @param ratedFileName The path of the file that contains the sessionid, productid and ratings
-	 * @return a double representing the average abolute difference between the actual rating and the prediction
-	 * @throws IOException
-	 * @throws TasteException
-	 * @Author Robert
+	 * @return a double representing the average absolute difference between the actual rating and the prediction
+	 * @author Robert
 	 */
 	public double evaluateRecommender() throws IOException, TasteException {
 		
@@ -219,7 +221,7 @@ public class MyRecommender {
 	static class MyRecommenderBuilder implements RecommenderBuilder{
 		
 		/**
-		 * This method builds the recommender
+		 * This method builds the recommender and contains all parameters that we change to achieve optimization
 		 * @author Robert
 		 */
 		public GenericUserBasedRecommender buildRecommender (DataModel dataModel) throws TasteException{
