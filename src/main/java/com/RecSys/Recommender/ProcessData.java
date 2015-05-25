@@ -205,7 +205,7 @@ public static String reduceDataset (int interval) throws Exception {
 	}
 	public static String[][] ConvertFileTo2dArray(String filePath) throws Exception
 	{
-		
+			
 		int noOfRows=getNoOfRows(filePath);
 		String [][] arrayFile=new String[noOfRows][3];
     	
@@ -264,11 +264,11 @@ public static String reduceDataset (int interval) throws Exception {
 			        if (x==j)
 			        {
 			        	
-			        	double y=Double.parseDouble(array1[2]);
-			        	double z=Double.parseDouble(array2[2]);
+			        	double y=Double.parseDouble(array1[1]);
+			        	double z=Double.parseDouble(array2[1]);
 			        	
 			        	
-			        	return Double.compare(z, y);
+			        	return Double.compare(y, z);
 			      
 			        	
 			        	
@@ -292,14 +292,14 @@ public static String reduceDataset (int interval) throws Exception {
 		String startDir = System.getProperty("user.dir");
 		
 		
-		String sortedFileName=startDir+"\\data\\YooChoose Dataset\\Sorted " + fileName.split("\\\\")[fileName.split("\\\\").length-1];
+		String sortedFileName=startDir+"\\data\\5 Recommendations\\Sorted " + fileName.split("\\\\")[fileName.split("\\\\").length-1];
 	
 		PrintWriter sortedFile= new PrintWriter (sortedFileName);
 	
 	
 		for (int i=0;i<arrayFile.length;i++)
 		{
-		   sortedFile.println(arrayFile[i][0]+";"+arrayFile[i][1]+";"+arrayFile[i][2]);
+		   sortedFile.println(arrayFile[i][0]+","+arrayFile[i][1]+","+arrayFile[i][2]);
 		   
 		}
 	

@@ -48,9 +48,9 @@ public class Main {
 		String mergedFileName = startDir
 				+ "\\data\\YooChoose Dataset\\Sorted Aggregated merged100th NO TIME.csv";
 		String ratedFileName =  startDir
-				+ "\\data\\YooChoose Dataset\\RatedChoiEtAl Sorted Aggregated merged100th NO TIME.csv";
-		String recommendationsChoiEtAlFileName =  startDir
-				+ "\\data\\YooChoose Dataset\\Recommendations RatedChoiEtAl Sorted Aggregated merged100th NO TIME.csv";
+				+ "\\data\\4 Rated\\Sorted RatedChoiEtAl Sorted Aggregated merged100th NO TIME.csv";
+		String ChoiEtAlPath =  startDir
+				+ "\\data\\5 Recommendations\\Recommendations Sorted RatedChoiEtAl Sorted Aggregated merged100th NO TIME.csv";
 		String mergedFileNameBuys =  startDir
 				+ "\\data\\YooChoose Dataset\\Sorted Aggregated merged100th NO TIME JUST BUYS.csv";
 
@@ -58,8 +58,8 @@ public class Main {
 				+ "\\data\\YooChoose Dataset\\Sorted Aggregated reduced100th NO TIME NO CATEGORY.csv";
 
 
-		String recommendationsSVDFileName= startDir
-				+ "\\data\\YooChoose Dataset\\SVD Recommendations Normalized.csv";
+		String SVDPath= startDir
+				+ "\\data\\5 Recommendations\\SVD Recommendations 100th Normalized.csv";
 
 		String mergedCombinedRecommendationsFileName = startDir
 				+ "\\data\\YooChoose Dataset\\MergedChoiEtAl and SVD Recommendations Normalized.csv";
@@ -71,9 +71,11 @@ public class Main {
 		//		ProcessData.normalizeImplicitRecScore(startDir
 //				+ "\\data\\YooChoose Dataset\\SVD Recommendations Sorted Aggregated reduced100th NO TIME NO CATEGORY.csv");
 		
-		
+//		ProcessData.sortFile(ratedFileName);
+
+//		
 		MyRecommender recommender = new MyRecommender(ratedFileName, mergedFileName);
-		String a = recommender.mergeRecommendationsFiles(recommendationsSVDFileName, recommendationsChoiEtAlFileName);
-		recommender.createFinalRecommendationsFile(a, 1);
+		String mergedRecommendationsFile = recommender.mergeRecommendationsFiles(SVDPath, ChoiEtAlPath);
+		recommender.createFinalRecommendationsFile(mergedRecommendationsFile, 3);
 	}
 }

@@ -359,7 +359,7 @@ public class MyRecommender {
 	public String createFinalRecommendationsFile (String mergedRecommendationsFile, int numberOfRecommendations) throws Exception{
 		
 		String fileNameSubstring = mergedRecommendationsFile.split("\\\\")[mergedRecommendationsFile.split("\\\\").length-1];
-		String outputFileName =mergedRecommendationsFile.replace(fileNameSubstring, "!!!FINAL RECOMMENDATIONS " + fileNameSubstring);
+		String outputFileName =mergedRecommendationsFile.replace(fileNameSubstring, "!!!FINAL RECOMMENDATIONS " + numberOfRecommendations + " RecsPerSession " + fileNameSubstring);
 		
 		String [] tempArray;
 		String currentSession;
