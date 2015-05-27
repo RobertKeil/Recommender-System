@@ -20,6 +20,7 @@ import org.apache.mahout.cf.taste.impl.neighborhood.ThresholdUserNeighborhood;
 import org.apache.mahout.cf.taste.impl.recommender.GenericUserBasedRecommender;
 import org.apache.mahout.cf.taste.impl.recommender.svd.ALSWRFactorizer;
 import org.apache.mahout.cf.taste.impl.recommender.svd.SVDRecommender;
+import org.apache.mahout.cf.taste.impl.similarity.EuclideanDistanceSimilarity;
 import org.apache.mahout.cf.taste.impl.similarity.PearsonCorrelationSimilarity;
 import org.apache.mahout.cf.taste.model.DataModel;
 import org.apache.mahout.cf.taste.neighborhood.UserNeighborhood;
@@ -35,27 +36,166 @@ This class contains contains our recommendation logic.
 public class MyRecommender {
 	
 	String ratedFileName;
-	String mergedFileName; 
 	String implicitFeedbackFile;
 	
 	/**
-	 * This constructor has to be called. It permamently stores the ratedFileName and MergedFilename for the recommender.
+	 * This constructor has to be called. It permanently stores the ratedFileName for the recommender.
+	 * @param ratedFileName The path of the file that contains the ratings (Structure: SessionID, ProductID, Rating (e.g. 5.0))
 	 */
-	public MyRecommender (String ratedFileName, String mergedFileName){
+	public MyRecommender (String ratedFileName){
 		this.ratedFileName = ratedFileName;
-		this.mergedFileName = mergedFileName;
 		this.implicitFeedbackFile=implicitFeedbackFile;
 		
 	}
 
 	/**
+	 * This inner class builds the recommender
+	 * @author Robert
+	 *
+	 */
+	static class MyRecommenderBuilder implements RecommenderBuilder{
+		
+		/**
+		 * This method builds the recommender and contains all parameters that we change to achieve optimization
+		 * @author Robert
+		 */
+		public GenericUserBasedRecommender buildRecommender (DataModel dataModel) throws TasteException{
+			
+			UserSimilarity similarity = new PearsonCorrelationSimilarity(dataModel);
+			UserNeighborhood neighborhood = new ThresholdUserNeighborhood(0.1, similarity, dataModel);
+			return new GenericUserBasedRecommender(dataModel, neighborhood, similarity);
+		}
+	}
+
+	static class SVDRecommenderBuilder implements RecommenderBuilder{
+			
+			/**
+			 * This method builds the SVD recommender with a factorizer
+			 * @author Daniel
+			 */
+			public SVDRecommender buildRecommender (DataModel dataModel) throws TasteException{
+				
+	//			SVD Recommender
+				
+			
+				
+		    	UserSimilarity userSimilarity = new PearsonCorrelationSimilarity(dataModel);
+		    	UserNeighborhood neighborhood = new NearestNUserNeighborhood(3, userSimilarity, dataModel);
+		    	Recommender recommender = new GenericUserBasedRecommender(dataModel, neighborhood, userSimilarity);
+		    			
+		    	ALSWRFactorizer factorizer = new ALSWRFactorizer(dataModel, 50, 0.065, 15);
+		
+		    	return new SVDRecommender(dataModel, factorizer);
+		    	
+		    	//
+				
+			}
+			
+			
+		}
+
+	/**
+	 * This method creates a file that contains a certain amount of recommended products for some users based on the input file and the parameters that are defined in the inner class MyRecommenderBuilder. 
+	 * Only those users appear in the file which correspond to the defined similarity threshold in Recommender Builder.
+	 * @param numberOfRecommendations how many recommendations per user
+	 * @param svdRecommender True if SVDRecommender should be used
+	 */
+	public String createRecommendationsFile (int numberOfRecommendations,Boolean svdRecommender) throws IOException, TasteException{
+		if(!svdRecommender){
+		String fileNameSubstring = ratedFileName.split("\\\\")[ratedFileName.split("\\\\").length-1];
+		String outputFileName = ratedFileName.replace(fileNameSubstring, "Recommendations EuclideanDistance " + fileNameSubstring);
+		
+		DataModel model = new FileDataModel(new File(ratedFileName));
+		 
+		MyRecommenderBuilder builder = new MyRecommenderBuilder();
+		UserBasedRecommender recommender = builder.buildRecommender(model);
+		 
+		FileInputStream ratedFile = new FileInputStream(new File(ratedFileName));
+		BufferedReader ratedFileReader = new BufferedReader(new InputStreamReader(ratedFile));	
+		PrintWriter recFile = new PrintWriter(outputFileName);
+		String currentUser = "";
+		String lastUser="";
+		int counter=0;
+		 
+		String line = ratedFileReader.readLine();
+		while (line != null) {
+			
+			currentUser= line.split(",")[0];
+			
+			//only print recommendations one time for every user
+			if (!lastUser.equals(currentUser)){
+				
+				List<RecommendedItem> recommendations = recommender.recommend(Integer.parseInt(currentUser), numberOfRecommendations);
+				 
+				 for (RecommendedItem recommendation : recommendations) {
+				 }
+				 System.out.println(counter++);
+			}
+			
+			lastUser=currentUser;
+			line = ratedFileReader.readLine();
+		 }
+		 ratedFileReader.close();
+		 recFile.close();
+		
+		return outputFileName;
+		}
+		else
+		{
+			String fileNameSubstring = implicitFeedbackFile.split("\\\\")[implicitFeedbackFile.split("\\\\").length-1];
+			String outputFileName =implicitFeedbackFile.replace(fileNameSubstring, "SVD Recommendations " + fileNameSubstring);
+			
+	
+			
+			
+			
+			DataModel model = new FileDataModel(new File(implicitFeedbackFile));
+			 
+			SVDRecommenderBuilder builder = new SVDRecommenderBuilder();
+			SVDRecommender recommender = builder.buildRecommender(model);
+			 
+			FileInputStream implicitFile = new FileInputStream(new File(implicitFeedbackFile));
+			BufferedReader implicitFileReader = new BufferedReader(new InputStreamReader(implicitFile));	
+			PrintWriter recFile = new PrintWriter(outputFileName);
+			String currentUser = "";
+			String lastUser="";
+			 
+			String line = implicitFileReader.readLine();
+			int counter=0;
+			while (line != null) {
+				
+				currentUser= line.split(",")[0];
+				
+				if (!lastUser.equals(currentUser)){
+					
+					List<RecommendedItem> recommendations = recommender.recommend(Integer.parseInt(currentUser), numberOfRecommendations);
+					 
+					 for (RecommendedItem recommendation : recommendations) {
+						 recFile.println(currentUser + ";" + recommendation.getItemID()+ ";" + recommendation.getValue());
+					 }
+					 System.out.println(counter++);
+				}
+				
+				lastUser=currentUser;
+				line = implicitFileReader.readLine();
+			 }
+			 implicitFileReader.close();
+			 recFile.close();
+			
+			return outputFileName;
+		}
+	}
+
+
+	/**
 	 * Sees if the recommendationsFile corresponds to the mergedFile, i.e. if the recommended buys reflect the actual buys. Correctly predicted buys are printed in a new file. Incorrect ones are shown in the console.
-	 * EDIT: Amount of correctly predicted buys will always be zero, because only products are recommended that have not been clicked on before. 
+	 * EDIT: Amount of correctly predicted buys will always be zero, because only products are recommended that have not been clicked on before i.e. that do not appear in the merged file.
 	 * 
 	 * @param recommendationsFileName path of the file with the recommendations
+	 * @param mergedFileName path of the file that contains the merged clicks and buys
 	 * @author Robert
 	 */
-	public String evaluateRecommendationsFile (String recommendationsFileName) throws Exception{
+	public String evaluateRecommendationsFile (String recommendationsFileName, String mergedFileName) throws Exception{
 		
 		String fileNameSubstring = recommendationsFileName.split("\\\\")[recommendationsFileName.split("\\\\").length-1];
 		String outputFileName = recommendationsFileName.replace(fileNameSubstring, "Evaluated " + fileNameSubstring);
@@ -111,101 +251,10 @@ public class MyRecommender {
 	
 	
 	/**
-	 * This method creates a file that contains a certain amount of recommended products for some users based on the input file and the parameters that are defined in the inner class MyRecommenderBuilder. 
-	 * Only those users appear in the file which correspond to the defined neighbourhood threshold in Recommender Builder.
-	 * @param numberOfRecommendations how many recommendations per user
-	 */
-	public String createRecommendationsFile (int numberOfRecommendations,Boolean svdRecommender) throws IOException, TasteException{
-		if(!svdRecommender){
-		String fileNameSubstring = ratedFileName.split("\\\\")[ratedFileName.split("\\\\").length-1];
-		String outputFileName = ratedFileName.replace(fileNameSubstring, "Recommendations " + fileNameSubstring);
-		
-		DataModel model = new FileDataModel(new File(ratedFileName));
-		 
-		MyRecommenderBuilder builder = new MyRecommenderBuilder();
-		UserBasedRecommender recommender = builder.buildRecommender(model);
-		 
-		FileInputStream ratedFile = new FileInputStream(new File(ratedFileName));
-		BufferedReader ratedFileReader = new BufferedReader(new InputStreamReader(ratedFile));	
-		PrintWriter recFile = new PrintWriter(outputFileName);
-		String currentUser = "";
-		String lastUser="";
-		int counter=0;
-		 
-		String line = ratedFileReader.readLine();
-		while (line != null) {
-			
-			currentUser= line.split(",")[0];
-			
-			//only print recommendations one time for every user
-			if (!lastUser.equals(currentUser)){
-				
-				List<RecommendedItem> recommendations = recommender.recommend(Integer.parseInt(currentUser), numberOfRecommendations);
-				 
-				 for (RecommendedItem recommendation : recommendations) {
-				 }
-				 System.out.println(counter++);
-			}
-			
-			lastUser=currentUser;
-			line = ratedFileReader.readLine();
-		 }
-		 ratedFileReader.close();
-		 recFile.close();
-		
-		return outputFileName;
-		}
-		else
-		{
-			String fileNameSubstring = implicitFeedbackFile.split("\\\\")[implicitFeedbackFile.split("\\\\").length-1];
-			String outputFileName =implicitFeedbackFile.replace(fileNameSubstring, "SVD Recommendations " + fileNameSubstring);
-			
-
-			
-			
-			
-			DataModel model = new FileDataModel(new File(implicitFeedbackFile));
-			 
-			SVDRecommenderBuilder builder = new SVDRecommenderBuilder();
-		SVDRecommender recommender = builder.buildRecommender(model);
-			 
-			FileInputStream implicitFile = new FileInputStream(new File(implicitFeedbackFile));
-			BufferedReader implicitFileReader = new BufferedReader(new InputStreamReader(implicitFile));	
-			PrintWriter recFile = new PrintWriter(outputFileName);
-			String currentUser = "";
-			String lastUser="";
-			 
-			String line = implicitFileReader.readLine();
-			int counter=0;
-			while (line != null) {
-				
-				currentUser= line.split(",")[0];
-				
-				if (!lastUser.equals(currentUser)){
-					
-					List<RecommendedItem> recommendations = recommender.recommend(Integer.parseInt(currentUser), numberOfRecommendations);
-					 
-					 for (RecommendedItem recommendation : recommendations) {
-						 recFile.println(currentUser + ";" + recommendation.getItemID()+ ";" + recommendation.getValue());
-					 }
-					 System.out.println(counter++);
-				}
-				
-				lastUser=currentUser;
-				line = implicitFileReader.readLine();
-			 }
-			 implicitFileReader.close();
-			 recFile.close();
-			
-			return outputFileName;
-		}
-	}
-	
-	
-	/**
 	 * This Method prints the recommendations onto the console based on the input file and the parameters that are defined in the inner class MyRecommenderBuilder
+	 * @param svdRecommender True if SVD recommender should be used
 	 */
-	public void printRecommendations (Boolean svdRecommender) throws IOException, TasteException{
+	public void printRecommendationsToConsole (Boolean svdRecommender) throws IOException, TasteException{
 		if (!svdRecommender){
 		 DataModel model = new FileDataModel(new File(ratedFileName));
 		 
@@ -267,56 +316,6 @@ public class MyRecommender {
 		
 	}
 	
-	/**
-	 * This inner class builds the recommender
-	 * @author Robert
-	 *
-	 */
-	static class MyRecommenderBuilder implements RecommenderBuilder{
-		
-		/**
-		 * This method builds the recommender and contains all parameters that we change to achieve optimization
-		 * @author Robert
-		 */
-		public GenericUserBasedRecommender buildRecommender (DataModel dataModel) throws TasteException{
-			
-			UserSimilarity similarity = new PearsonCorrelationSimilarity(dataModel);
-			UserNeighborhood neighborhood = new ThresholdUserNeighborhood(0.2, similarity, dataModel);
-			return new GenericUserBasedRecommender(dataModel, neighborhood, similarity);
-		}
-		
-		
-	}
-	
-	
-	
-	static class SVDRecommenderBuilder implements RecommenderBuilder{
-		
-		/**
-		 * This method builds the SVD recommender with a factorizer
-		 * @author Daniel
-		 */
-		public SVDRecommender buildRecommender (DataModel dataModel) throws TasteException{
-			
-//			SVD Recommender
-			
-		
-			
-	    	UserSimilarity userSimilarity = new PearsonCorrelationSimilarity(dataModel);
-	    	UserNeighborhood neighborhood = new NearestNUserNeighborhood(3, userSimilarity, dataModel);
-	    	Recommender recommender = new GenericUserBasedRecommender(dataModel, neighborhood, userSimilarity);
-	    			
-	    	ALSWRFactorizer factorizer = new ALSWRFactorizer(dataModel, 50, 0.065, 15);
-	
-	    	return new SVDRecommender(dataModel, factorizer);
-	    	
-	    	//
-			
-		}
-		
-		
-	}
-	
 	public String mergeRecommendationsFiles (String SVDPath, String ChoiEtAlPath) throws Exception{
 		
 		String fileNameSubstring = SVDPath.split("\\\\")[SVDPath.split("\\\\").length-1];
@@ -344,7 +343,9 @@ public class MyRecommender {
 		  }
 		  brChoiEtAlFile.close();
 		  mergedFile.close();
-		String outputFileName = ProcessData.sortFile(intermediateFileName);
+		String outputFileName = ProcessData.sortFile(intermediateFileName, true, 2, ";");
+		
+		System.out.println(outputFileName);
 		
 		return outputFileName;
 		  
@@ -389,17 +390,7 @@ public class MyRecommender {
 		  }
 		  brFile.close();
 		  outputFile.close();
+		  System.out.println(outputFileName);
 		  return outputFileName;
-	}
-	
-	public String createCombinedRecommendationsFile () throws Exception{
-		String choiEtAlFileName = createRecommendationsFile(3, false);
-		String SVDFileName = createRecommendationsFile(3, true);
-		
-		String mergedRecommendationsFileName = mergeRecommendationsFiles(choiEtAlFileName, SVDFileName);
-		
-		String finalCombinedRecommendations = createFinalRecommendationsFile(mergedRecommendationsFileName, 3);
-		return finalCombinedRecommendations;
-		
 	}
 }

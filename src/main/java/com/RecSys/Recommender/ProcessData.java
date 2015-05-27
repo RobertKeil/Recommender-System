@@ -194,16 +194,17 @@ public static String reduceDataset (int interval) throws Exception {
 	 * Changes are based on number sorting priorities, line separator, number of columns and paths of read and print file
 	 * @author Daniel
 	 * @param fileName
+	 * @param desc True if inner sorting should be descending, false if inner sorting should be ascending
 	 * @return
 	 * @throws Exception
 	 */
-	public static String  sortFile (String fileName)throws Exception
+	public static String  sortFile (String fileName, boolean desc, int innerArrayPosition, String separator)throws Exception
 	{
-		String[][] arrayFile=ConvertFileTo2dArray(fileName);
-		arrayFile=sort2dArray(arrayFile);
+		String[][] arrayFile=ConvertFileTo2dArray(fileName, separator);
+		arrayFile=sort2dArray(arrayFile, desc, innerArrayPosition);
 		return  convertFrom2dArrayToFile(arrayFile, fileName);
 	}
-	public static String[][] ConvertFileTo2dArray(String filePath) throws Exception
+	public static String[][] ConvertFileTo2dArray(String filePath, String separator) throws Exception
 	{
 			
 		int noOfRows=getNoOfRows(filePath);
@@ -221,7 +222,7 @@ public static String reduceDataset (int interval) throws Exception {
 		 while (line!=null)
 			 
 		 {
-			 arrayFile[arrayLine]=line.split(";");
+			 arrayFile[arrayLine]=line.split(separator);
 			 
 			 line=brFile.readLine();
 		
@@ -255,7 +256,7 @@ public static String reduceDataset (int interval) throws Exception {
 		  return lineCounter;
 	}
 		
-	public static String [][] sort2dArray(String [][] file){
+	public static String [][] sort2dArray(String [][] file, final boolean desc, final int innerArrayPosition){
 		 Arrays.sort(file, new Comparator<String[]>() {
 			 public int compare(String[] array1, String[] array2) {
 			int  x = Integer.valueOf(array1[0]);
@@ -264,12 +265,13 @@ public static String reduceDataset (int interval) throws Exception {
 			        if (x==j)
 			        {
 			        	
-			        	double y=Double.parseDouble(array1[1]);
-			        	double z=Double.parseDouble(array2[1]);
+			        	double y=Double.parseDouble(array1[innerArrayPosition]);
+			        	double z=Double.parseDouble(array2[innerArrayPosition]);
 			        	
-			        	
-			        	return Double.compare(y, z);
-			      
+			        	if (desc)
+			        		return Double.compare(z, y);
+			        	else 
+			        		return Double.compare(y, z);
 			        	
 			        	
 			   
@@ -354,7 +356,7 @@ public static String reduceDataset (int interval) throws Exception {
 	public static String convertToRatingsStudyByChoiEtAl(String mergedFileName) throws Exception
 	{
 		String [] arrayLine;
-		String ratedFileName= startDir+"\\data\\YooChoose Dataset\\RatedChoiEtAl " + mergedFileName.split("\\\\")[mergedFileName.split("\\\\").length-1];
+		String ratedFileName= startDir+"\\data\\4 Rated\\RatedChoiEtAl " + mergedFileName.split("\\\\")[mergedFileName.split("\\\\").length-1];
 		
 		int[][]totalUserClicksAndBuys=getTotalClicksAndBuysForEachSession(mergedFileName);
 		
