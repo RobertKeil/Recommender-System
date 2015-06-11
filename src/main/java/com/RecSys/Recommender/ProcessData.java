@@ -14,15 +14,13 @@ import org.apache.commons.lang3.ArrayUtils;
 
 /**
  * This class preprocesses the data of the competition.
- * 
- * @author Robert and Daniel
- *
+ * There are methods to reduce the initial dataset, to aggregate values or to sort or merge files. Many of the operations could also be done in other programming languages or by using databases.
  */
 public class ProcessData {
  static 	String startDir = System.getProperty("user.dir");
 
  /**
-  * creates a dataset that contains every xth session of the original clicks dataset. 
+  * Creates a dataset that contains every xth session of the original clicks dataset. 
   * @param interval determines in which interval a session should be kept in the file
   * @return the path of the reduced file
   * @throws Exception
@@ -106,28 +104,32 @@ public static String reduceDataset (int interval) throws Exception {
 	  brBuy.close();
 	}
 	
+	/**
+	 * This method normalizes the preference values of the SVD recommender's output. Values are normalized to a value between 0 and 5
+	 * @param outputRecFile Path of the file that contains the recommendations of the SVD recommender
+	 * @throws Exception
+	 */
 	public static void normalizeImplicitRecScore(String outputRecFile) throws Exception {
 		
 	String outputFileName= "C:\\Users\\Daniel\\workspace\\Recommender-System\\data\\YooChoose Dataset\\SVD Recommendations Normalized.csv";
 	
-		  
 		  FileInputStream recFile= new FileInputStream(new File(outputRecFile));
 		  BufferedReader brRec = new BufferedReader(new InputStreamReader(recFile));
 		  String line= brRec.readLine();
 		  PrintWriter outputFile = new PrintWriter (outputFileName);
 		  String tempClick = brRec.readLine();
-		
+		  
 		  while (line!=null)
 		  {
 			  double normalizedValue;
 			  
 			 double realValue=Double.parseDouble(line.split(";")[2]);
+			 
+			 // data analysis has shown that values buys have a peak at 6 clicks. before and after that amount buys go down.
 			 if (realValue<=6){
 				 
 				 normalizedValue=(realValue/6)*5;
-				 
-				
-				 
+
 			 }
 			 else
 			 {
@@ -141,19 +143,13 @@ public static String reduceDataset (int interval) throws Exception {
 				 normalizedValue=(1-(0.12*result))*5;
 				 
 			 }
-			  
 			  outputFile.write(line.split(";")[0] + ";" + line.split(";")[1] + ";" + normalizedValue +"\n");
 			  line=brRec.readLine();
-		
 			  
 		  }
 		  
-		  
-	
 		  brRec.close();
 		  outputFile.close();
-		  
-		
 	}
 
 	/**
@@ -161,6 +157,7 @@ public static String reduceDataset (int interval) throws Exception {
 	 * Several clicks of the same user on the same product are summed up. This is why the timestamp is left out in the result
 	 * @param clickFileName Path of the clicks file that should be aggregated
 	 * @param aggregatedFileName Path of the buys file that should be created 
+	 * @throws Exception
 	 */
 	public static void aggregateClicks (String clickFileName, String aggregatedFileName) throws Exception {
 			  
@@ -190,12 +187,14 @@ public static String reduceDataset (int interval) throws Exception {
 		  aggregatedFile.close();
 		  brClick.close();
 		}
-	/**Make sure to adapt respective parameters in the methods called by sortFile. 
-	 * Changes are based on number sorting priorities, line separator, number of columns and paths of read and print file
-	 * @author Daniel
-	 * @param fileName
+	
+	/** 
+	 * Sorts the files
+	 * @param fileName Path of the file to be sorted
+	 * @param innerArrayPosition The position of the column in the file which should be sorted with 2. priority (0 means 1. Column) 
 	 * @param desc True if inner sorting should be descending, false if inner sorting should be ascending
-	 * @return
+	 * @param separator (either "," or ";")
+	 * @return Path of the sorted file
 	 * @throws Exception
 	 */
 	public static String  sortFile (String fileName, boolean desc, int innerArrayPosition, String separator)throws Exception
@@ -204,6 +203,14 @@ public static String reduceDataset (int interval) throws Exception {
 		arrayFile=sort2dArray(arrayFile, desc, innerArrayPosition);
 		return  convertFrom2dArrayToFile(arrayFile, fileName);
 	}
+	
+	/**
+	 * Converts a file to a 2d array to be able to sort it
+	 * @param filePath Path of file
+	 * @param separator Which separator? Either "," or ";"
+	 * @return A 2d String array
+	 * @throws Exception
+	 */
 	public static String[][] ConvertFileTo2dArray(String filePath, String separator) throws Exception
 	{
 			
@@ -230,13 +237,15 @@ public static String reduceDataset (int interval) throws Exception {
 			 
 		 }
 		 
-		 
-		 
-		 
-		 
 		 return arrayFile;
-		 
 	}
+	
+	/**
+	 * Counts the number of rows in a file
+	 * @param fileName Path of the file
+	 * @return Number of rows
+	 * @throws Exception
+	 */
 	public static int getNoOfRows(String fileName) throws Exception
 	{
 		  FileInputStream file= new FileInputStream(new File(fileName));
@@ -255,7 +264,14 @@ public static String reduceDataset (int interval) throws Exception {
 		  }
 		  return lineCounter;
 	}
-		
+	
+	/**
+	 * Sort the 2d array
+	 * @param file Path of the file
+	 * @param desc True if Descending order
+	 * @param innerArrayPosition The position of the column in the file which should be sorted with 2. priority (0 means 1. Column)
+	 * @return A sorted string array
+	 */
 	public static String [][] sort2dArray(String [][] file, final boolean desc, final int innerArrayPosition){
 		 Arrays.sort(file, new Comparator<String[]>() {
 			 public int compare(String[] array1, String[] array2) {
@@ -289,6 +305,13 @@ public static String reduceDataset (int interval) throws Exception {
 		
 		}
 	
+	/**
+	 * Print the sorted array to a file
+	 * @param arrayFile The string array
+	 * @param fileName Name of the file to be sorted
+	 * @return Path of the sorted File
+	 * @throws Exception
+	 */
 	public static String convertFrom2dArrayToFile(String [][] arrayFile, String fileName) throws Exception
 	{
 		String startDir = System.getProperty("user.dir");
@@ -308,6 +331,13 @@ public static String reduceDataset (int interval) throws Exception {
 		sortedFile.close();
 	return sortedFileName;
 	}
+	
+	/**
+	 * Method prints a file with ratings. Can be combined with different algorithms in class RatingAlgorithm.java
+	 * @param mergedFileName Path of the merged file (clicks and buys merged, structure: sessionid, productid, category, numberClicks, price, numberBuys)
+	 * @return Path of the ratings file
+	 * @throws Exception
+	 */
 	public static String convertToRatings(String mergedFileName) throws Exception
 	{
 		String [] arrayLine;
@@ -333,7 +363,7 @@ public static String reduceDataset (int interval) throws Exception {
 					 
 					 		ratedFile.println(arrayLine[0]+"," + 
 					 		arrayLine[1]+","+ 
-					 		RatingAlgorithm.algorithm2(Integer.parseInt(arrayLine[3]), Integer.parseInt(arrayLine[5]), totalUserClicksAndBuys[counter][1],totalUserClicksAndBuys[counter][2]));
+					 		RatingAlgorithm.algorithm1(Integer.parseInt(arrayLine[3]), Integer.parseInt(arrayLine[5]), totalUserClicksAndBuys[counter][1],totalUserClicksAndBuys[counter][2]));
 						 }
 				 }	
 				 counter++;
@@ -349,8 +379,8 @@ public static String reduceDataset (int interval) throws Exception {
 	/**
 	 * This method creates a files with implicit ratings. it follows the approach by Chio et al. 
 	 * Modification of the approach by Choi et al: Also clicks will be regarded. 
-	 * @param mergedFileName
-	 * @return
+	 * @param mergedFileName Path of merged file
+	 * @return Path of rated file
 	 * @throws Exception
 	 */
 	public static String convertToRatingsStudyByChoiEtAl(String mergedFileName) throws Exception
@@ -389,7 +419,7 @@ public static String reduceDataset (int interval) throws Exception {
 			//already print those entries where no product was bought
 			if (Integer.parseInt(arrayLine[5])==0){
 			ratedFile.println(arrayLine[0] + "," + arrayLine[1] + "," 
-					+ RatingAlgorithm.algorithm4Step3(Integer.parseInt(arrayLine[3])));
+					+ RatingAlgorithm.algorithm3Step3(Integer.parseInt(arrayLine[3])));
 			}
 			
 			// only use Choi et al's algorithm if there have been buys
@@ -403,7 +433,7 @@ public static String reduceDataset (int interval) throws Exception {
 						 
 						 absolutePreference[arrayAbsolutePreferenceCounter][0]= currentSessionID =arrayLine[0];
 						 absolutePreference[arrayAbsolutePreferenceCounter][1]= currentProductID =arrayLine[1];
-						 absolutePreference[arrayAbsolutePreferenceCounter][2]= currentAbsolutePreference =Double.toString(RatingAlgorithm.algorithm4Step1(
+						 absolutePreference[arrayAbsolutePreferenceCounter][2]= currentAbsolutePreference =Double.toString(RatingAlgorithm.algorithm3Step1(
 								 Integer.parseInt(arrayLine[5]), 
 								 totalUserClicksAndBuys[clicksBuysCounter][2]));
 						 arrayAbsolutePreferenceCounter++;
@@ -443,7 +473,7 @@ public static String reduceDataset (int interval) throws Exception {
 				index = ArrayUtils.indexOf(highestAbsolutePreferencePerProduct[0], absolutePreference[counter][1]);
 				
 				ratedFile.println(absolutePreference[counter][0] + "," + absolutePreference[counter][1] + "," 
-				+ RatingAlgorithm.algorithm4Step2(Double.parseDouble(absolutePreference[counter][2]), Double.parseDouble(highestAbsolutePreferencePerProduct[1][index])));						
+				+ RatingAlgorithm.algorithm3Step2(Double.parseDouble(absolutePreference[counter][2]), Double.parseDouble(highestAbsolutePreferencePerProduct[1][index])));						
 						
 				System.out.println(counter++);
 			}
@@ -493,13 +523,12 @@ public static String reduceDataset (int interval) throws Exception {
 	
 	/**
 	 * This method joins a clicks file and a buys file. Both files have to be aggregated.
-	 * Join happens on productID and sessionID 
-	 * @param clickFileName path of the clicks file
-	 * @param buyFileName path of the buys file
+	 * Join happens on productID and sessionID.
+	 * @param clickFileName path of the aggregated clicks file
+	 * @param buyFileName path of the aggregated buys file
 	 * @param mergedFileName path of the merged file to be created
 	 * @throws Exception
-	 */
-	
+	 */	
 	public static void joinDatasets(String clickFileName,String buyFileName, String mergedFileName) throws Exception{
 			
 		
@@ -554,10 +583,10 @@ public static String reduceDataset (int interval) throws Exception {
 
 	/**
 	 * This method prints all records that correspond to a session in  the clicks file but which contain a product id that did not appear in the clicks file
-	 * EDIT: Output File is always empty because there are no buys of products that hve not been clicked on
-	 * @param clickFileName
-	 * @param buyFileName
-	 * @param mergedFileName
+	 * EDIT: Output File is always empty because there are no buys of products that have not been clicked on
+	 * @param clickFileName Path of clicks file
+	 * @param buyFileName Path of buys file
+	 * @param mergedFileName Path of merged File
 	 * @throws Exception
 	 */
 		public static void joinDatasetsBuysWithoutCorrespondingProductID(String clickFileName,String buyFileName, String mergedFileName) throws Exception{
@@ -614,62 +643,5 @@ public static String reduceDataset (int interval) throws Exception {
 			  brClick.close();
 			  brBuy.close();
 			  mergedFile.close();
-		}
-		
-		
-		public static void getTopKResults(int k,String fileName) throws Exception
-		{
-			
-//			FileReader sortedRatingsFile= new FileReader(new File(fileName));
-//			  BufferedReader sortedRatingsBufferedReader= new BufferedReader(sortedRatingsFile);
-			  FileInputStream ratingsFile= new FileInputStream(new File(fileName));
-			  BufferedReader sortedRatingsBufferedReader = new BufferedReader(new InputStreamReader(ratingsFile));
-	String topKFileName=startDir
-				+ "\\data\\YooChoose Dataset\\top " + k +"recommendations.csv";
-			  PrintWriter topKWriter = new PrintWriter (topKFileName);
-			  
-			 String line=sortedRatingsBufferedReader.readLine();
-			 
-			
-		while (line!=null)
-		{
-			
-			String sessionId=line.split(";")[0];
-			
-		
-			boolean moreThanTopKAvailable=true;
-			
-				for(int counter=1;counter<=k;counter++)
-				{
-					
-					
-					if (line.split(";")[0]==sessionId){
-					topKWriter.write(line +"/n");
-					}
-					
-					else{
-						
-						moreThanTopKAvailable=false;
-						break;
-					}
-					
-					line=sortedRatingsBufferedReader.readLine();
-					
-					
-				}
-			
-				if (moreThanTopKAvailable)
-				{
-					while(line.split(";")[0]==sessionId)
-					{
-						line=sortedRatingsBufferedReader.readLine();
-						
-					}
-				}
-				
-			
-		
-			  
-		}
 		}
 }	  

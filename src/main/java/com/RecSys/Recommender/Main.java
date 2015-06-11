@@ -19,14 +19,12 @@ import org.apache.mahout.cf.taste.similarity.UserSimilarity;
 
 /**
  * This class contains the main method 
- * @author Daniel and Robert
  *
  */
 public class Main {
 
 	/** Main method just used to process data and to create recommendations.
 	 * Path Strings can be changed as desired. 
-	 * @author Robert
 	 */
 	
 	public static void main(String[] args) throws Exception {
@@ -34,38 +32,35 @@ public class Main {
 		String startDir = System.getProperty("user.dir");
 
 		String clicksFileName = startDir
-				+ "\\data\\YooChoose Dataset\\reduced1000th.csv";
+				+ "\\data\\0 Reduced Clicks\\reduced1000th.csv";
 		String buysFileName = startDir
-				+ "\\data\\YooChoose Dataset\\yoochoose-buys.dat";
+				+ "\\data\\yoochoose-buys.dat";
 		String sortedClicksFileName = startDir
-				+ "\\data\\YooChoose Dataset\\Sorted reduced100th.csv";
+				+ "\\data\\1 Sorted\\Sorted reduced100th.csv";
 		String sortedBuysFileName = startDir
-				+ "\\data\\YooChoose Dataset\\Sorted yoochoose-buys.dat";
+				+ "\\data\\1 Sorted\\Sorted yoochoose-buys.dat";
 		String aggregatedClicksFileName = startDir
-				+ "\\data\\YooChoose Dataset\\Sorted Aggregated reduced100th NO TIME NO CATEGORY.csv";
+				+ "\\data\\2 Aggregated\\Sorted Aggregated reduced100th NO TIME NO CATEGORY.csv";
 		String aggregatedBuysFileName = startDir
-				+ "\\data\\YooChoose Dataset\\Sorted Aggregated buys NO TIME.dat";
+				+ "\\data\\2 Aggregated\\Sorted Aggregated buys NO TIME.dat";
 		String mergedFileName = startDir
 				+ "\\data\\3 Merged\\Sorted Aggregated merged1000th NO TIME.csv";
 		String ratedFileName =  startDir
 				+ "\\data\\4 Rated\\Sorted RatedChoiEtAl Sorted Aggregated merged1000th NO TIME.csv";
 		String ChoiEtAlPath =  startDir
 				+ "\\data\\5 Recommendations\\Recommendations Sorted RatedChoiEtAl Sorted Aggregated merged100th NO TIME.csv";
-		String mergedFileNameBuys =  startDir
-				+ "\\data\\YooChoose Dataset\\Sorted Aggregated merged100th NO TIME JUST BUYS.csv";
 
 		String implicitClicksFile= startDir
-				+ "\\data\\YooChoose Dataset\\Sorted Aggregated reduced100th NO TIME NO CATEGORY.csv";
-
+				+ "\\data\\2 Aggregated\\Sorted Aggregated reduced100th NO TIME NO CATEGORY.csv";
 
 		String SVDPath= startDir
 				+ "\\data\\5 Recommendations\\SVD Recommendations 100th Normalized.csv";
 
 		String mergedCombinedRecommendationsFileName = startDir
-				+ "\\data\\YooChoose Dataset\\MergedChoiEtAl and SVD Recommendations Normalized.csv";
+				+ "\\data\\5 Recommenndations\\MergedChoiEtAl and SVD Recommendations Normalized.csv";
 
 		String sortedMergedCombinedRecommendationsFileName = startDir
-				+ "\\data\\YooChoose Dataset\\Sorted MergedChoiEtAl and SVD Recommendations Normalized.csv";
+				+ "\\data\\5 Recommendations\\Sorted MergedChoiEtAl and SVD Recommendations Normalized.csv";
 
 //		ProcessData.convertToRatingsStudyByChoiEtAl(mergedFileName);
 		
